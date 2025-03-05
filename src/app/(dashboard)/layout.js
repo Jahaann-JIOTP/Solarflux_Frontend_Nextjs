@@ -7,7 +7,7 @@ export default function DashboardLayout({ children }) {
   const [activeButton, setActiveButton] = useState("today");
 
   return (
-    <div className="h-screen w-screen flex bg-gray-950">
+    <div className="h-screen w-screen flex bg-black">
       {/* Sidebar (Fixed) */}
       <Sidebar />
 
@@ -34,7 +34,7 @@ export default function DashboardLayout({ children }) {
         </Header>
 
         {/* Page Content (Fixed) */}
-        <main className="p-6 flex-grow bg-gray-950 text-white overflow-auto mt-[70px]"> {/* Added margin to prevent overlap */}
+        <main className="p-6 flex-grow bg-black text-white overflow-auto mt-[70px]"> {/* Added margin to prevent overlap */}
           {children}
         </main>
       </div>
