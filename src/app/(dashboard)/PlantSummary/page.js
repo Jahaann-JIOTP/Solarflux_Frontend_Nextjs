@@ -1,11 +1,14 @@
+"use client";
 import EnergyChart from "@/components/dashboard_area";
 import SolarCostChart from "@/components/dashboard_cost_column";
 import DonutChart from "@/components/dashboard_dounut";
 import SolarProductionChart from "@/components/dashboard_production_column";
 import SolarSuppressionChart from "@/components/dashboard_suppression_column";
 import Co2Dashboard from "@/components/dashboard_sustainability";
+import { useState } from "react";
 
-export default function PlantSummary({ }) {
+export default function PlantSummary({}) {
+  const [activeButton, setActiveButton] = useState("today");
   return (
     <div className="relative h-full w-full flex flex-col text-white ">
       {/* Main Section Grid Layout */}
@@ -16,30 +19,50 @@ export default function PlantSummary({ }) {
             <DonutChart option={3} />
           </ChartCard>
           <ChartCard title="CHANGE IN CONSUMPTION">
-            <SolarCostChart option={3}/>
+            <SolarCostChart option={3} />
           </ChartCard>
           <ChartCard title="CHANGE IN SUPPRESSION">
-            <SolarSuppressionChart option={3}/>
+            <SolarSuppressionChart option={3} />
           </ChartCard>
         </div>
 
         {/* Center Column - Pakistan Map */}
         <div className="relative flex justify-center items-center">
+          <div className="flex justify-center ml-[50px] items-center py-2 gap-3 mt-[-600] z-[9999]">
+            {["today", "month", "year"].map((period) => (
+              <button
+                key={period}
+                id={`${period}Btn`}
+                className={`px-5 py-1 mx-2 text-sm rounded-md ${
+                  activeButton === period
+                    ? "dash-button !bg-[#bf4a63]"
+                    : "dash-button"
+                }`}
+                onClick={() => setActiveButton(period)}
+              >
+                {period.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <div className="absolute inset-0 flex justify-center items-center">
-            <img src="/pakistanbg.png" alt="Pakistan Map" className="w-full object-cover scale-300" />
+            <img
+              src="/pakistanbg.png"
+              alt="Pakistan Map"
+              className="w-full object-cover scale-300"
+            />
           </div>
         </div>
 
         {/* Right Column */}
         <div className="flex flex-col z-10">
-        <ChartCard title="CONSUMPTION COMPARISON">
-            <EnergyChart option={3}/>
+          <ChartCard title="CONSUMPTION COMPARISON">
+            <EnergyChart option={3} />
           </ChartCard>
           <ChartCard title="COST AND CONSUMPTION">
-            <SolarProductionChart option={3}/>
+            <SolarProductionChart option={3} />
           </ChartCard>
           <ChartCard title="SUSTAINABILITY GOALS">
-            <Co2Dashboard option={3}/>
+            <Co2Dashboard option={3} />
           </ChartCard>
         </div>
       </div>
@@ -75,14 +98,17 @@ export default function PlantSummary({ }) {
 }
 
 // Reusable Chart Card Component
-function ChartCard({ title, children}) {
+function ChartCard({ title, children }) {
   return (
     <div className="py-2 px-4 mb-2 rounded-xl shadow-lg">
       <h3 className="custom-header">{title}</h3>
       <div className="chart-container1">
-        {children ? children : <p className="text-gray-400">Chart Placeholder</p>}
+        {children ? (
+          children
+        ) : (
+          <p className="text-gray-400">Chart Placeholder</p>
+        )}
       </div>
     </div>
   );
 }
-

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function Header({ children }) {
+export default function Header({ children, title }) {
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
 
@@ -34,22 +34,26 @@ export default function Header({ children }) {
           alignItems: "center",
           justifyContent: "start",
           position: "relative",
-          marginRight:"10px"
+          marginRight: "10px",
         }}
       >
         <h2 className="font-bold flex-grow ml-[3vw] text-[1.5vw] text-center">
-          DASHBOARD
+          {title}
         </h2>
         <div className="absolute right-5 top-[30%] transform -translate-y-1/2 text-[0.8vw] font-bold text-gray-300">
           <div className="text-center rounded-md mx-auto">
-            <div className="text-white text-[0.8rem] shadow-sm">{currentTime}</div>
-            <div className="tracking-[3px] text-[0.7rem] text-white">{currentDate}</div>
+            <div className="text-white text-[0.8rem] shadow-sm">
+              {currentTime}
+            </div>
+            <div className="tracking-[3px] text-[0.7rem] text-white">
+              {currentDate}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Ensures content below header is properly spaced */}
-      <div className="mt-[80px]">{children}</div>
+      {/* <div className="mt-[80px]">{children}</div> */}
     </header>
   );
 }

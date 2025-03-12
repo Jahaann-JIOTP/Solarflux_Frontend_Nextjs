@@ -179,3 +179,37 @@ body {
   padding: 10px;
 }
 
+/* 🌟 Input Fields */
+.input-field {
+  width: 100%;
+  padding: 10px;
+  background: #222d3b;
+  border: 1px solid #0e3a53;
+  color: white;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.3s ease-in-out;
+  margin-top: 5px;
+}
+
+.input-field::placeholder {
+  color: #aaa;
+}
+
+.input-field:focus {
+  border-color: #00e0ff;
+  box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+/* 🌟 Dropdown (User Role) */
+.select-field {
+  width: 100%;
+  padding: 10px;
+  background: #222d3b;
+  border: 1px solid #0e3a53;
+  color: white;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.3s ease-in-out;
+  margin-top: 5px;
+}
