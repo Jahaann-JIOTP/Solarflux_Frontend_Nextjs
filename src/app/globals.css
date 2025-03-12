@@ -1,4 +1,111 @@
 @import "tailwindcss";
+#main-section::-webkit-scrollbar {
+  width: 8px; /* Set the width of the scrollbar */
+}
+
+#main-section::-webkit-scrollbar-thumb {
+  background-color: #3498db; /* Set the color of the scrollbar thumb */
+  border-radius: 10px;
+}
+
+#main-section::-webkit-scrollbar-track {
+  background-color: #e0e0e0; /* Set the color of the scrollbar track */
+}
+.sidebar {
+  z-index: 1000;
+  height: 95vh;
+  width: 90px;
+  background-color: #04192B;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+  transition: width 0.3s ease-in-out;
+}
+
+.sidebar.hidden {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.toggle-btn, .collapsed-toggle-btn {
+  background-color: #04192B;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.menu-item.active {
+  background-color: #282f41;
+  border-left: 2px solid red;
+}
+
+.submenu {
+  margin-left: 20px;
+  padding: 10px;
+  background-color: #04192B;
+  border-left: 2px solid red;
+  border-radius: 5px;
+}
+
+.submenu-item {
+  text-decoration: none;
+  color: white;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.footer-logo img {
+  height: 70px;
+}
+
+.dash-button{
+  background-color: #045da3;
+  color: #fff;
+  font-size: .8vw;
+  padding: 5px 20px;
+  border-radius: 15px;
+  display: inline-block;
+  position: relative;
+  letter-spacing: 1px;
+  margin: 0 5px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .3s;
+  border: none !important;
+  width: 130px;
+}
+
+.font-digital {
+  height: 10vh;
+  padding-top: 0.8vw;
+  font-size: 1.6vw;
+  font-family: "digital-7", sans-serif;
+  color: #05CEF2;
+}
+
+@font-face {
+  font-family: "digital-7";
+  src: url("fonts/Digital Numbers 400.ttf");
+}
 
 :root {
   --background: #ffffff;
@@ -24,6 +131,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
 .custom-header {
   font-weight: 700;
   text-align: center;

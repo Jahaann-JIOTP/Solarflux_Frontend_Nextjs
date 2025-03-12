@@ -24,7 +24,7 @@ export default function Sidebar() {
       <img
         src="/shams.png"
         alt="Logo"
-        className="mb-4 w-20 h-auto"
+        className="max-w-none"
       />
 
       <div className="border-t border-gray-500 w-full my-2"></div>
@@ -47,7 +47,7 @@ export default function Sidebar() {
       <img
         src="/company.png"
         alt="Footer Logo"
-        className="h-[70px] mt-4"
+        className="h-[90px] mt-4 max-w-none"
       />
     </aside>
   );
