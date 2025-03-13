@@ -213,3 +213,18 @@ body {
   transition: 0.3s ease-in-out;
   margin-top: 5px;
 }
+
+.submenu {
+  position: absolute;
+  top: 0;
+  width: 185px;
+  left: 130%;
+  background-color: #04192b;
+  flex-direction: column;
+  padding: 10px;
+  border-left: 2px solid red;
+  border-radius: 5px;
+  margin-left: 20px;
+  visibility: visible;
+  transition: opacity .3s ease, visibility 0s 0s;
+}

@@ -10,6 +10,7 @@ export default function DashboardLayout({ children }) {
   const getTitle = () => {
     if (pathname.includes("UserManagement")) return "USER MANAGMENT";
     if (pathname.includes("Dashboard")) return "DASHBOARD";
+    if (pathname.includes("NationWide")) return "COUNTRY LEVEL";
     if (pathname.includes("Settings")) return "Settings";
     if (pathname.includes("Reports")) return "Reports";
     return "Dashboard"; // Default title
