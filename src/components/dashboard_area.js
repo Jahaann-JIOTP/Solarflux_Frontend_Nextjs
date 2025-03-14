@@ -13,7 +13,7 @@ export default function EnergyChart({ option }) {
   useEffect(() => {
     const fetchChartData = async () => {
       try {
-        const response = await axios.post(`${baseUrl}get_dash_data`, { option });
+        const response = await axios.post(`${baseUrl}dashboard/get_dash_data`, { option });
 
         const { labels, datasets } = response.data;
         if (labels && datasets) {

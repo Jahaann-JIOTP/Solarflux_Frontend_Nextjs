@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 #main-section::-webkit-scrollbar {
   width: 8px; /* Set the width of the scrollbar */
 }

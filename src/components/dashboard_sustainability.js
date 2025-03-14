@@ -11,7 +11,7 @@ export default function Co2Dashboard({ option }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.post(`${baseUrl}get_dash_stat_data`, { option });
+                const response = await axios.post(`${baseUrl}dashboard/get_dash_stat_data`, { option });
                 setActualCo2(response.data.actualco2 || 0);
             } catch (error) {
                 console.error("Error fetching CO₂ data:", error);

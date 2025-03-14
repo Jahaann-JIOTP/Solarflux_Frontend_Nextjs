@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import axios from 'axios';
+import config from '@/config';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -33,8 +34,7 @@ const DonutChart = ({ option }) => {
         }
 
         // Fetch suppression data
-        const suppressionResponse = await axios.post(
-          'https://solarfluxapi.nexalyze.com/calculate_dash_suppression',
+        const suppressionResponse = await axios.post("https://solarfluxapi.nexalyze.com/calculate_dash_suppression",
           {
             start_date: startDate,
             end_date: endDate,
@@ -45,15 +45,8 @@ const DonutChart = ({ option }) => {
         );
 
         // Fetch kw data
-        const statResponse = await axios.post(
-          'https://solarfluxapi.nexalyze.com/get_dash_stat_data',
-          {
-            option: option,
-          }
-        );
-
+        const statResponse = await axios.post(`${config.BASE_URL}dashboard/get_dash_stat_data`, { option });
         const kw = statResponse.data.kw || 0; // Use kw from API response
-
         let suppressionValue = 0;
 
         if (option === 1) {

@@ -28,7 +28,7 @@ export default function SolarSuppressionChart({ option }) {
           startDate = new Date(yesterday.getFullYear() - 1, 0, 1); // January 1 of last year
         }
 
-        const response = await axios.post(`${baseUrl}calculate_dash_suppression`, {
+        const response = await axios.post("https://solarfluxapi.nexalyze.com/calculate_dash_suppression", {
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
           stationCode: "NE=53278269",

@@ -13,7 +13,7 @@ const SolarCostChart = ({ option }) => {
   useEffect(() => {
     const fetchChartData = async () => {
       try {
-        const response = await axios.post(`${config.BASE_URL}get_dash_cost_data`, { option });
+        const response = await axios.post(`${config.BASE_URL}dashboard/get_dash_cost_data`, { option });
         let { labels, datasets } = response.data;
 
         if (labels && datasets) {

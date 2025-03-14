@@ -3,33 +3,42 @@ import EnergyChart from "@/components/dashboard_area";
 import SolarCostChart from "@/components/dashboard_cost_column";
 import DonutChart from "@/components/dashboard_dounut";
 import SolarProductionChart from "@/components/dashboard_production_column";
+import SolarSources from "@/components/dashboard_stats";
 import SolarSuppressionChart from "@/components/dashboard_suppression_column";
 import Co2Dashboard from "@/components/dashboard_sustainability";
 import { useState } from "react";
 
-export default function PlantSummary({}) {
-  const [activeButton, setActiveButton] = useState("today");
+export default function PlantSummary() {
+  const [activeButton, setActiveButton] = useState("last day");
+
+  // Mapping of button values to option numbers
+  const optionMap = {
+    "last day": 1,
+    month: 2,
+    year: 3,
+  };
+
   return (
-    <div className="relative h-full w-full flex flex-col text-white ">
+    <div className="relative h-full w-full flex flex-col text-white">
       {/* Main Section Grid Layout */}
       <div className="grid grid-cols-3 gap-36 mt-[-20px]">
         {/* Left Column */}
         <div className="flex flex-col z-10">
           <ChartCard title="ENERGY SPLIT">
-            <DonutChart option={3} />
+            <DonutChart option={optionMap[activeButton]} />
           </ChartCard>
           <ChartCard title="CHANGE IN CONSUMPTION">
-            <SolarCostChart option={3} />
+            <SolarCostChart option={optionMap[activeButton]} />
           </ChartCard>
           <ChartCard title="CHANGE IN SUPPRESSION">
-            <SolarSuppressionChart option={3} />
+            <SolarSuppressionChart option={optionMap[activeButton]} />
           </ChartCard>
         </div>
 
         {/* Center Column - Pakistan Map */}
         <div className="relative flex justify-center items-center">
-          <div className="flex justify-center ml-[50px] items-center py-2 gap-3 mt-[-600] z-[9999]">
-            {["today", "month", "year"].map((period) => (
+          <div className="flex justify-center ml-[50px] items-center py-2 gap-3 mt-[-550] z-[9999]">
+            {["last day", "month", "year"].map((period) => (
               <button
                 key={period}
                 id={`${period}Btn`}
@@ -56,43 +65,19 @@ export default function PlantSummary({}) {
         {/* Right Column */}
         <div className="flex flex-col z-10">
           <ChartCard title="CONSUMPTION COMPARISON">
-            <EnergyChart option={3} />
+            <EnergyChart option={optionMap[activeButton]} />
           </ChartCard>
           <ChartCard title="COST AND CONSUMPTION">
-            <SolarProductionChart option={3} />
+            <SolarProductionChart option={optionMap[activeButton]} />
           </ChartCard>
           <ChartCard title="SUSTAINABILITY GOALS">
-            <Co2Dashboard option={3} />
+            <Co2Dashboard option={optionMap[activeButton]} />
           </ChartCard>
         </div>
       </div>
 
       {/* Bottom Section (Solar & Other Sources) */}
-      <div className="flex flex-col items-center mt-[-80px] space-y-6 z-10">
-        {/* First Row */}
-        <div className="flex justify-center space-x-20">
-          <div className="text-center">
-            <p className="custom-header !w-[200px]">SOLAR</p>
-            <p className="text-2xl font-digital mt-3">0 KW</p>
-          </div>
-          <div className="text-center">
-            <p className="custom-header !w-[200px]">OTHER SOURCES</p>
-            <p className="text-2xl font-digital mt-3">0 KW</p>
-          </div>
-        </div>
-
-        {/* Second Row */}
-        <div className="flex justify-center space-x-20">
-          <div className="text-center">
-            <p className="custom-header !w-[200px]">BATTERY</p>
-            <p className="text-2xl font-digital mt-3">0 KW</p>
-          </div>
-          <div className="text-center">
-            <p className="custom-header !w-[200px]">GRID</p>
-            <p className="text-2xl font-digital mt-3">0 KW</p>
-          </div>
-        </div>
-      </div>
+        <SolarSources option={optionMap[activeButton]}/>
     </div>
   );
 }
