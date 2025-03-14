@@ -119,7 +119,7 @@ export default function UserManagement() {
 
       {/* Roles Tab */}
       {activeTab === "roles" && (
-        <div className="bg-[#182028] p-6 rounded-xl shadow-lg">
+        <div className="bg-[#182028] p-6 rounded-xl shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
           {/* Roles Table */}
           <h3 className="custom-header mb-6">Roles List</h3>
           <div className="overflow-x-auto">
@@ -147,7 +147,7 @@ export default function UserManagement() {
 
       {/* Add User Tab */}
       {activeTab === "addUser" && (
-        <div className="bg-[#182028] p-6 rounded-xl shadow-lg">
+        <div className="bg-[#182028] p-6 rounded-xl shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
           <h2 className="custom-header">Add New User</h2>
 
           {/* User Details Section */}
@@ -234,7 +234,7 @@ export default function UserManagement() {
 
       {/* View Users Tab */}
       {activeTab === "viewUsers" && (
-        <div className="bg-[#182028] p-6 rounded-xl shadow-lg">
+        <div className="bg-[#182028] p-6 rounded-xl shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
           <h3 className="custom-header mb-4">Users List</h3>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-600 text-white">

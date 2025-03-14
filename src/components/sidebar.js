@@ -38,11 +38,11 @@ export default function Sidebar() {
     <aside
       className={`fixed top-2 left-2 h-[95vh] ${
         isExpanded ? "w-60" : "w-[90px]"
-      } bg-[#04192b] rounded-2xl p-5 flex flex-col items-center transition-all duration-300 ease-in-out z-[9999]`}
+      } bg-[#0D2D42] rounded-2xl p-5 flex flex-col items-center transition-all duration-300 ease-in-out z-[9999] shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]`}
     >
       {/* Toggle Button */}
       <button
-        className="text-white mb-4 absolute top-[45px] right-[-25px] bg-[#04192b] rounded-xl p-2"
+        className="text-white mb-4 absolute top-[45px] right-[-25px] bg-[#0D2D42] rounded-xl p-2 "
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <FaChevronLeft

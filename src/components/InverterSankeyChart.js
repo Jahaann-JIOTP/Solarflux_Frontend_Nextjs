@@ -7,50 +7,63 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
 
-export default function NationWide() {
-  const [selectedOption2, setSelectedOption2] = useState(2);
-  const [selectedOption3, setSelectedOption3] = useState(3);
-  const [dropdown3Options, setDropdown3Options] = useState([
-    { value: 3, label: "City" },
-    { value: 5, label: "Plant" },
-  ]);
+export default function InverterSankeyChart() {
+  const [selectedPlant, setSelectedPlant] = useState("Coca Cola Faisalabad");
+  const [selectedInverter, setSelectedInverter] = useState("");
+  const [inverterOptions, setInverterOptions] = useState([]);
   const [dateRange, setDateRange] = useState([
     moment().subtract(29, "days").toDate(),
     moment().subtract(1, "days").toDate(),
   ]);
 
   useEffect(() => {
-    createChart();
+    fetchInverters();
   }, []);
 
-  const updateThirdDropdown = (value) => {
-    setSelectedOption2(value);
-
-    let newOptions = [];
-    if (value === 2) {
-      newOptions = [
-        { value: 3, label: "City" },
-        { value: 5, label: "Plant" },
-      ];
-    } else if (value === 3) {
-      newOptions = [{ value: 5, label: "Plant" }];
+  useEffect(() => {
+    if (selectedInverter) {
+      createChart();
     }
+  }, [selectedInverter]);
 
-    setDropdown3Options(newOptions);
+  const fetchInverters = async () => {
+    try {
+      const response = await fetch("https://solarfluxapi.nexalyze.com/get-devices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ station: selectedPlant }),
+      });
 
-    // Ensure selectedOption3 updates correctly with the new options
-    setSelectedOption3(newOptions.length > 0 ? newOptions[0].value : "");
+      if (!response.ok) throw new Error(await response.text());
+
+      const data = await response.json();
+      setInverterOptions(data);
+
+      if (data.length > 0) {
+        setSelectedInverter(data[0].value);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching inverters:", error);
+    }
   };
 
   const fetchSankeyData = async () => {
+    if (!selectedPlant || !selectedInverter || !dateRange[0] || !dateRange[1]) {
+      console.error("🚨 Missing required fields in API request");
+      return;
+    }
+
     const payload = {
-      options: [1, selectedOption2, selectedOption3].filter((o) => o),
-      start_date: moment(dateRange[0]).format("YYYY-MM-DD"),
-      end_date: moment(dateRange[1]).format("YYYY-MM-DD"),
+      Plant: selectedPlant,
+      devId: selectedInverter,
+      startDate: moment(dateRange[0]).format("YYYY-MM-DD"),
+      endDate: moment(dateRange[1]).format("YYYY-MM-DD"),
     };
 
+    console.log("📡 Sending API Request with Payload:", payload);
+
     try {
-      const response = await fetch("https://solarfluxapi.nexalyze.com/sankey", {
+      const response = await fetch("https://solarfluxapi.nexalyze.com/sankey-data-mppts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -61,7 +74,7 @@ export default function NationWide() {
       const data = await response.json();
       updateChartData(data);
     } catch (error) {
-      console.error("Error fetching Sankey data:", error);
+      console.error("❌ Error fetching Sankey data:", error);
     }
   };
 
@@ -78,13 +91,13 @@ export default function NationWide() {
   const createChart = () => {
     const chart = am4core.create("chartdiv", am4charts.SankeyDiagram);
     chart.logo.disabled = true;
-    chart.padding(50, 150, 10, 10);
+    chart.padding(50, 120, 10, 10);
 
     chart.dataFields.fromName = "from";
     chart.dataFields.toName = "to";
     chart.dataFields.value = "value";
     chart.nodeWidth = 10;
-    chart.nodePadding = 70;
+    chart.nodePadding = 40;
 
     const linkTemplate = chart.links.template;
     linkTemplate.colorMode = "gradient";
@@ -94,23 +107,11 @@ export default function NationWide() {
     const nodeTemplate = chart.nodes.template;
     nodeTemplate.nameLabel.label.text = "{name}";
     nodeTemplate.nameLabel.label.wrap = true;
-    nodeTemplate.nameLabel.label.maxWidth = 750;
     nodeTemplate.nameLabel.label.fontSize = 14;
-    nodeTemplate.nameLabel.label.fill = am4core.color("#ffffff");
-    nodeTemplate.inert = true;
     nodeTemplate.stroke = am4core.color("#fff");
     nodeTemplate.strokeWidth = 2;
+    nodeTemplate.nameLabel.label.fill = am4core.color("#ffffff");
     nodeTemplate.tooltipText = "{name}";
-    nodeTemplate.adapter.add("fill", (fill, target) =>
-      target.dataItem.dataContext.nodeColor
-        ? am4core.color(target.dataItem.dataContext.nodeColor)
-        : fill
-    );
-
-    nodeTemplate.cornerRadiusTopLeft = 5;
-    nodeTemplate.cornerRadiusTopRight = 5;
-    nodeTemplate.cornerRadiusBottomLeft = 5;
-    nodeTemplate.cornerRadiusBottomRight = 5;
 
     window.chart = chart;
     fetchSankeyData();
@@ -118,31 +119,30 @@ export default function NationWide() {
 
   return (
     <div className="p-2">
-      {/* Dropdown Controls */}
+      {/* Controls */}
       <div className="flex justify-end space-x-4 mb-4 items-center">
-        {/* Tier 1 Dropdown */}
+        {/* Plant Selection */}
         <div className="flex items-center space-x-2">
-          <label className="text-white">Tier 1:</label>
+          <label className="text-white">Plant:</label>
           <select
-            className="px-2 py-1 rounded-md text-[14px] bg-[#0D2D42]  h-[32px] text-white w-[200px]"
-            value={selectedOption2}
-            onChange={(e) => updateThirdDropdown(Number(e.target.value))}
+            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[250px] text-[14px]"
+            value={selectedPlant}
+            onChange={(e) => setSelectedPlant(e.target.value)}
           >
-            <option value={2}>Province</option>
-            <option value={3}>City</option>
+            <option value="Coca Cola Faisalabad">Coca Cola Faisalabad</option>
           </select>
         </div>
 
-        {/* Tier 2 Dropdown */}
+        {/* Inverter Selection */}
         <div className="flex items-center space-x-2">
-          <label className="text-white">Tier 2:</label>
+          <label className="text-white">Inverter:</label>
           <select
-            className="px-2 py-1 rounded-md bg-[#0D2D42] text-[14px]  h-[32px] text-white w-[200px]"
-            value={selectedOption3}
-            onChange={(e) => setSelectedOption3(Number(e.target.value))}
-            disabled={dropdown3Options.length === 0}
+            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[250px] text-[14px]"
+            value={selectedInverter}
+            onChange={(e) => setSelectedInverter(e.target.value)}
           >
-            {dropdown3Options.map((option) => (
+            <option value="" disabled>Select Inverter</option>
+            {inverterOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -170,14 +170,14 @@ export default function NationWide() {
         {/* Generate Button */}
         <button
           className="px-4 py-1 rounded-md bg-red-500 text-white h-[32px]"
-          onClick={fetchSankeyData} // ✅ Call API on button click
+          onClick={fetchSankeyData}
         >
           Generate
         </button>
       </div>
 
       {/* Chart Container */}
-      <div className="w-full h-[70vh] pt-[50px] mt-[20px] overflow-hidden bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
+      <div className="w-full h-[1200px] pt-[50px] mt-[20px] overflow-hidden bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
         <div id="chartdiv" className="w-full h-[90%]"></div>
       </div>
     </div>

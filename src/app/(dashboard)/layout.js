@@ -23,16 +23,16 @@ export default function DashboardLayout({ children }) {
     : "bg-gradient-to-b from-[#0b3c75] via-[#1e609e] to-[#468faf]";
 
   return (
-    <div className={`h-screen w-screen flex overflow-hidden ${backgroundStyle}`} >
+    <div className={`h-screen w-screen flex overflow-hidden`} >
       {/* Sidebar (Fixed) */}
       <Sidebar />
 
       {/* Main Content Wrapper */}
       <div className="flex flex-col flex-grow h-full ml-[90px] min-h-0 overflow-auto" id="main-section">
         {/* Header */}
-        <main className={`p-6 flex-grow text-white h-full ${backgroundStyle}`}>
+        <main className={`p-6 flex-grow text-white h-full`}>
           <div className="ml-[1%] grid grid-cols-12 gap-5 w-[99%] h-[95%] rounded-lg bg-black/75">
-            <div className="col-span-12 flex flex-col justify-between">
+            <div className="col-span-12 flex flex-col">
               <Header title={getTitle()} />
               {children}
             </div>
