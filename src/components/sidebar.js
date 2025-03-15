@@ -17,6 +17,12 @@ import {
   FaUserAlt,
   FaAngleDown,
 } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa"; // ✅ Import Logout Icon
+import { useRouter } from "next/navigation"; // ✅ Import Router for Redirect
+import axios from "axios";
+import Swal from "sweetalert2"; // ✅ Import SweetAlert for notifications
+
+const API_BASE_URL = "http://localhost:5000"; // ✅ Backend URL
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -30,9 +36,62 @@ export default function Sidebar() {
   }, [pathname]);
 
   // Check if any submenu is active
-  const isProductionActive = pathname.startsWith("/NationWide") || 
-                             pathname.startsWith("/PlantLevel") || 
-                             pathname.startsWith("/InvertorLevel");
+  const isProductionActive =
+    pathname.startsWith("/NationWide") ||
+    pathname.startsWith("/PlantLevel") ||
+    pathname.startsWith("/InvertorLevel");
+    const router = useRouter(); // ✅ Initialize Router
+    const handleLogout = async () => {
+      const token = localStorage.getItem("token");
+    
+      if (!token) {
+        Swal.fire({
+          icon: "error",
+          title: "Already Logged Out",
+          text: "No active session found.",
+          background: "#222D3B",
+          color: "#ffffff",
+        });
+        return;
+      }
+    
+      try {
+        await axios.post(
+          `${API_BASE_URL}/auth/logout`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+    
+        // ✅ Clear Token and Redirect Immediately
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+    
+        Swal.fire({
+          icon: "success",
+          title: "Logged Out",
+          text: "You have been logged out successfully.",
+          background: "#222D3B",
+          color: "#ffffff",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+    
+        setTimeout(() => {
+          router.push("/login"); // 🚀 Redirect to Login Page Immediately
+        }, 1500);
+        
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Logout Failed",
+          text: error.response?.data?.message || "Something went wrong!",
+          background: "#222D3B",
+          color: "#ffffff",
+        });
+      }
+    };
 
   return (
     <aside
@@ -76,43 +135,139 @@ export default function Sidebar() {
             onClick={() => setIsProductionOpen(!isProductionOpen)}
           >
             <FaSitemap
-              className={`text-lg ${isProductionActive ? "text-[#bf4a63]" : "text-white"}`}
+              className={`text-lg ${
+                isProductionActive ? "text-[#bf4a63]" : "text-white"
+              }`}
             />
-            {isExpanded && <span className={`${isProductionActive ? "text-[#bf4a63]" : "text-white"} text-[12px]`}>Production</span>}
+            {isExpanded && (
+              <span
+                className={`${
+                  isProductionActive ? "text-[#bf4a63]" : "text-white"
+                } text-[12px]`}
+              >
+                Production
+              </span>
+            )}
             {isExpanded && (
               <FaAngleDown
-                className={`ml-auto transition-transform ${isProductionOpen ? "rotate-180" : ""}`}
+                className={`ml-auto transition-transform ${
+                  isProductionOpen ? "rotate-180" : ""
+                }`}
               />
             )}
           </div>
 
           {/* Submenu */}
-          <div className={`${isExpanded ? "ml-4" : "absolute left-[80px] !pl-0 top-0 bg-[#04192b] p-2 border-l-3 border-[#bf4a63] rounded-lg w-[200px] shadow-lg"} ${isProductionOpen ? "block" : "hidden"}`}>
-            <SidebarItem text="– &nbsp;Country Level" href="/NationWide" isExpanded={true} active={pathname === "/NationWide"} isSubmenu={true} />
-            <SidebarItem text="– &nbsp;Plant Level" href="/PlantLevel" isExpanded={true} active={pathname === "/PlantLevel"} isSubmenu={true} />
-            <SidebarItem text="– &nbsp;Inverter Level" href="/InvertorLevel" isExpanded={true} active={pathname === "/InvertorLevel"} isSubmenu={true} />
+          <div
+            className={`${
+              isExpanded
+                ? "ml-4"
+                : "absolute left-[80px] !pl-0 top-0 bg-[#04192b] p-2 border-l-3 border-[#bf4a63] rounded-lg w-[200px] shadow-lg"
+            } ${isProductionOpen ? "block" : "hidden"}`}
+          >
+            <SidebarItem
+              text="– &nbsp;Country Level"
+              href="/NationWide"
+              isExpanded={true}
+              active={pathname === "/NationWide"}
+              isSubmenu={true}
+            />
+            <SidebarItem
+              text="– &nbsp;Plant Level"
+              href="/PlantLevel"
+              isExpanded={true}
+              active={pathname === "/PlantLevel"}
+              isSubmenu={true}
+            />
+            <SidebarItem
+              text="– &nbsp;Inverter Level"
+              href="/InvertorLevel"
+              isExpanded={true}
+              active={pathname === "/InvertorLevel"}
+              isSubmenu={true}
+            />
           </div>
         </div>
 
-        <SidebarItem icon={FaProjectDiagram} text="SLD" href="/SingleLineDiagram" isExpanded={isExpanded} active={pathname === "/SingleLineDiagram"} />
-        <SidebarItem icon={FaChartBar} text="Suppression" href="/SuppressionView" isExpanded={isExpanded} active={pathname === "/SuppressionView"} />
-        <SidebarItem icon={FaHeartbeat} text="Health" href="/Health" isExpanded={isExpanded} active={pathname === "/Health"} />
-        <SidebarItem icon={FaChartLine} text="Analysis" href="/AnalysisTrend" isExpanded={isExpanded} active={pathname === "/AnalysisTrend"} />
-        <SidebarItem icon={FaSolarPanel} text="Solar Analytics" href="/SolarAnalytics" isExpanded={isExpanded} active={pathname === "/SolarAnalytics"} />
-        <SidebarItem icon={FaBolt} text="Power Analytics" href="/PowerAnalytics" isExpanded={isExpanded} active={pathname === "/PowerAnalytics"} />
-        <SidebarItem icon={FaUserAlt} text="User Management" href="/UserManagement" isExpanded={isExpanded} active={pathname === "/UserManagement"} />
+        <SidebarItem
+          icon={FaProjectDiagram}
+          text="SLD"
+          href="/SingleLineDiagram"
+          isExpanded={isExpanded}
+          active={pathname === "/SingleLineDiagram"}
+        />
+        <SidebarItem
+          icon={FaChartBar}
+          text="Suppression"
+          href="/SuppressionView"
+          isExpanded={isExpanded}
+          active={pathname === "/SuppressionView"}
+        />
+        <SidebarItem
+          icon={FaHeartbeat}
+          text="Health"
+          href="/Health"
+          isExpanded={isExpanded}
+          active={pathname === "/Health"}
+        />
+        <SidebarItem
+          icon={FaChartLine}
+          text="Analysis"
+          href="/AnalysisTrend"
+          isExpanded={isExpanded}
+          active={pathname === "/AnalysisTrend"}
+        />
+        <SidebarItem
+          icon={FaSolarPanel}
+          text="Solar Analytics"
+          href="/SolarAnalytics"
+          isExpanded={isExpanded}
+          active={pathname === "/SolarAnalytics"}
+        />
+        <SidebarItem
+          icon={FaBolt}
+          text="Power Analytics"
+          href="/PowerAnalytics"
+          isExpanded={isExpanded}
+          active={pathname === "/PowerAnalytics"}
+        />
+        <SidebarItem
+          icon={FaUserAlt}
+          text="User Management"
+          href="/UserManagement"
+          isExpanded={isExpanded}
+          active={pathname === "/UserManagement"}
+        />
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 text-white px-3 py-3 rounded-md transition w-full cursor-pointer bg-red-600 hover:bg-red-700"
+        >
+          <FaSignOutAlt className="text-lg" />
+          {isExpanded && <span className="text-[12px]">Logout</span>}
+        </button>
       </nav>
 
       <div className="flex-grow"></div>
 
       {/* Footer Logo */}
-      <img src="/company.png" alt="Footer Logo" className="h-[90px] mt-4 max-w-none" />
+      <img
+        src="/company.png"
+        alt="Footer Logo"
+        className="h-[90px] mt-4 max-w-none"
+      />
     </aside>
   );
 }
 
 /* ✅ Sidebar Item Component with Active State */
-const SidebarItem = ({ icon: Icon, text, href, isExpanded, active, isSubmenu = false }) => {
+const SidebarItem = ({
+  icon: Icon,
+  text,
+  href,
+  isExpanded,
+  active,
+  isSubmenu = false,
+}) => {
   return (
     <Link href={href} passHref>
       <div
@@ -120,9 +275,19 @@ const SidebarItem = ({ icon: Icon, text, href, isExpanded, active, isSubmenu = f
           ${isSubmenu ? "text-[12px] pl-5 py-1" : "px-3 py-3"} 
           ${active ? "text-[#bf4a63]" : "text-white"}`}
       >
-        {Icon && <Icon className={`text-lg shrink-0 ${active ? "text-[#bf4a63]" : "text-white"}`} />}
+        {Icon && (
+          <Icon
+            className={`text-lg shrink-0 ${
+              active ? "text-[#bf4a63]" : "text-white"
+            }`}
+          />
+        )}
         {isExpanded && (
-          <span className={`text-[12px] ${active ? "text-[#bf4a63]" : "text-white"} leading-none`}>
+          <span
+            className={`text-[12px] ${
+              active ? "text-[#bf4a63]" : "text-white"
+            } leading-none`}
+          >
             {text}
           </span>
         )}
@@ -130,5 +295,3 @@ const SidebarItem = ({ icon: Icon, text, href, isExpanded, active, isSubmenu = f
     </Link>
   );
 };
-
-

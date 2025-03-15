@@ -1,10 +1,21 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Header from "@/components/header";
 import Sidebar from "@/components/sidebar";
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // ✅ Check Authentication on Page Load
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login"); // 🚀 Redirect to Login Page if Not Logged In
+    }
+  }, [router]); // ✅ Run this when the router changes
 
   // Function to set the title dynamically based on pathname
   const getTitle = () => {
@@ -17,13 +28,9 @@ export default function DashboardLayout({ children }) {
     return "Dashboard"; // Default title
   };
 
-  // Determine background based on pathname
-  const backgroundStyle = pathname.includes("PlantSummary")
-    ? "bg-black"
-    : "bg-gradient-to-b from-[#0b3c75] via-[#1e609e] to-[#468faf]";
 
   return (
-    <div className={`h-screen w-screen flex overflow-hidden`} >
+    <div className={`h-screen w-screen flex overflow-hidden`}>
       {/* Sidebar (Fixed) */}
       <Sidebar />
 
