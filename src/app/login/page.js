@@ -21,6 +21,20 @@ export default function Login() {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
+  // ✅ Handle Forgot Password Popup
+  const handleForgotPassword = () => {
+    Swal.fire({
+      icon: "info",
+      title: "Forgot Password?",
+      html: `<p>If you want to forgot your password and need a reset, please contact the administrator:</p><br />
+             <p><strong>Admin Email:</strong> <a href="mailto:jahaann@jiotp.com" style="color:#3498db;">jahaann@jiotp.com</a></p>`,
+      background: "#222D3B",
+      color: "#ffffff",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "OK",
+    });
+  };
+
   // ✅ Handle Form Submission (Login API)
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -144,7 +158,8 @@ export default function Login() {
           {/* Forgot Password */}
           <a
             href="#"
-            className="mt-3 block text-center text-sm text-white opacity-70 hover:opacity-100"
+            className="mt-3 block text-center text-sm text-white opacity-70 hover:opacity-100 cursor-pointer"
+            onClick={handleForgotPassword} // ✅ Call function on click
           >
             Forgot password?
           </a>

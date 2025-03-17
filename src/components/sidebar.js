@@ -29,6 +29,26 @@ export default function Sidebar() {
   const [isProductionOpen, setIsProductionOpen] = useState(false);
   const pathname = usePathname();
 
+  const [allowedPrivileges, setAllowedPrivileges] = useState([]);
+
+  useEffect(() => {
+    setIsProductionOpen(false);
+    setIsExpanded(false); // Collapse sidebar on page change
+
+    // Fetch user data from localStorage
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser.role && parsedUser.role.privileges) {
+          setAllowedPrivileges(parsedUser.role.privileges.map((p) => p.name));
+        }
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, [pathname]);
+
   // Close submenu and collapse sidebar when page changes
   useEffect(() => {
     setIsProductionOpen(false);
@@ -40,58 +60,57 @@ export default function Sidebar() {
     pathname.startsWith("/NationWide") ||
     pathname.startsWith("/PlantLevel") ||
     pathname.startsWith("/InvertorLevel");
-    const router = useRouter(); // ✅ Initialize Router
-    const handleLogout = async () => {
-      const token = localStorage.getItem("token");
-    
-      if (!token) {
-        Swal.fire({
-          icon: "error",
-          title: "Already Logged Out",
-          text: "No active session found.",
-          background: "#222D3B",
-          color: "#ffffff",
-        });
-        return;
-      }
-    
-      try {
-        await axios.post(
-          `${API_BASE_URL}/auth/logout`,
-          {},
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-    
-        // ✅ Clear Token and Redirect Immediately
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-    
-        Swal.fire({
-          icon: "success",
-          title: "Logged Out",
-          text: "You have been logged out successfully.",
-          background: "#222D3B",
-          color: "#ffffff",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-    
-        setTimeout(() => {
-          router.push("/login"); // 🚀 Redirect to Login Page Immediately
-        }, 1500);
-        
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Logout Failed",
-          text: error.response?.data?.message || "Something went wrong!",
-          background: "#222D3B",
-          color: "#ffffff",
-        });
-      }
-    };
+  const router = useRouter(); // ✅ Initialize Router
+  const handleLogout = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      Swal.fire({
+        icon: "error",
+        title: "Already Logged Out",
+        text: "No active session found.",
+        background: "#222D3B",
+        color: "#ffffff",
+      });
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${API_BASE_URL}/auth/logout`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // ✅ Clear Token and Redirect Immediately
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      Swal.fire({
+        icon: "success",
+        title: "Logged Out",
+        text: "You have been logged out successfully.",
+        background: "#222D3B",
+        color: "#ffffff",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
+      setTimeout(() => {
+        router.push("/login"); // 🚀 Redirect to Login Page Immediately
+      }, 1500);
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Logout Failed",
+        text: error.response?.data?.message || "Something went wrong!",
+        background: "#222D3B",
+        color: "#ffffff",
+      });
+    }
+  };
 
   return (
     <aside
@@ -118,126 +137,146 @@ export default function Sidebar() {
 
       {/* Sidebar Menu */}
       <nav className="flex flex-col w-full space-y-1 relative">
-        <SidebarItem
-          icon={FaTachometerAlt}
-          text="Dashboard"
-          href="/PlantSummary"
-          isExpanded={isExpanded}
-          active={pathname === "/PlantSummary"}
-        />
+        {allowedPrivileges.includes("Dashboard") && (
+          <SidebarItem
+            icon={FaTachometerAlt}
+            text="Dashboard"
+            href="/PlantSummary"
+            isExpanded={isExpanded}
+            active={pathname === "/PlantSummary"}
+          />
+        )}
 
         {/* Production - Parent Item */}
-        <div className="relative">
-          <div
-            className={`flex items-center space-x-3 px-3 text-white p-2 rounded-md transition w-full cursor-pointer ${
-              isProductionActive ? "text-[#bf4a63]" : ""
-            }`}
-            onClick={() => setIsProductionOpen(!isProductionOpen)}
-          >
-            <FaSitemap
-              className={`text-lg ${
-                isProductionActive ? "text-[#bf4a63]" : "text-white"
+        {allowedPrivileges.includes("Production") && (
+          <div className="relative">
+            <div
+              className={`flex items-center space-x-3 px-3 text-white p-2 rounded-md transition w-full cursor-pointer ${
+                isProductionActive ? "text-[#bf4a63]" : ""
               }`}
-            />
-            {isExpanded && (
-              <span
-                className={`${
+              onClick={() => setIsProductionOpen(!isProductionOpen)}
+            >
+              <FaSitemap
+                className={`text-lg ${
                   isProductionActive ? "text-[#bf4a63]" : "text-white"
-                } text-[12px]`}
-              >
-                Production
-              </span>
-            )}
-            {isExpanded && (
-              <FaAngleDown
-                className={`ml-auto transition-transform ${
-                  isProductionOpen ? "rotate-180" : ""
                 }`}
               />
-            )}
-          </div>
+              {isExpanded && (
+                <span
+                  className={`text-[12px] ${
+                    isProductionActive ? "text-[#bf4a63]" : "text-white"
+                  }`}
+                >
+                  Production
+                </span>
+              )}
+              {isExpanded && (
+                <FaAngleDown
+                  className={`ml-auto transition-transform ${
+                    isProductionOpen ? "rotate-180" : ""
+                  }`}
+                />
+              )}
+            </div>
 
-          {/* Submenu */}
-          <div
-            className={`${
-              isExpanded
-                ? "ml-4"
-                : "absolute left-[80px] !pl-0 top-0 bg-[#04192b] p-2 border-l-3 border-[#bf4a63] rounded-lg w-[200px] shadow-lg"
-            } ${isProductionOpen ? "block" : "hidden"}`}
-          >
-            <SidebarItem
-              text="– &nbsp;Country Level"
-              href="/NationWide"
-              isExpanded={true}
-              active={pathname === "/NationWide"}
-              isSubmenu={true}
-            />
-            <SidebarItem
-              text="– &nbsp;Plant Level"
-              href="/PlantLevel"
-              isExpanded={true}
-              active={pathname === "/PlantLevel"}
-              isSubmenu={true}
-            />
-            <SidebarItem
-              text="– &nbsp;Inverter Level"
-              href="/InvertorLevel"
-              isExpanded={true}
-              active={pathname === "/InvertorLevel"}
-              isSubmenu={true}
-            />
+            {/* Submenu */}
+            <div
+              className={`${
+                isExpanded
+                  ? "ml-4"
+                  : "absolute left-[80px] !pl-0 top-0 bg-[#04192b] p-2 border-l-3 border-[#bf4a63] rounded-lg w-[200px] shadow-lg"
+              } ${isProductionOpen ? "block" : "hidden"}`}
+            >
+              <SidebarItem
+                text="– &nbsp;Country Level"
+                href="/NationWide"
+                isExpanded={true}
+                active={pathname === "/NationWide"}
+                isSubmenu={true}
+              />
+              <SidebarItem
+                text="– &nbsp;Plant Level"
+                href="/PlantLevel"
+                isExpanded={true}
+                active={pathname === "/PlantLevel"}
+                isSubmenu={true}
+              />
+              <SidebarItem
+                text="– &nbsp;Inverter Level"
+                href="/InvertorLevel"
+                isExpanded={true}
+                active={pathname === "/InvertorLevel"}
+                isSubmenu={true}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
-        <SidebarItem
-          icon={FaProjectDiagram}
-          text="SLD"
-          href="/SingleLineDiagram"
-          isExpanded={isExpanded}
-          active={pathname === "/SingleLineDiagram"}
-        />
-        <SidebarItem
-          icon={FaChartBar}
-          text="Suppression"
-          href="/SuppressionView"
-          isExpanded={isExpanded}
-          active={pathname === "/SuppressionView"}
-        />
-        <SidebarItem
-          icon={FaHeartbeat}
-          text="Health"
-          href="/Health"
-          isExpanded={isExpanded}
-          active={pathname === "/Health"}
-        />
-        <SidebarItem
-          icon={FaChartLine}
-          text="Analysis"
-          href="/AnalysisTrend"
-          isExpanded={isExpanded}
-          active={pathname === "/AnalysisTrend"}
-        />
-        <SidebarItem
-          icon={FaSolarPanel}
-          text="Solar Analytics"
-          href="/SolarAnalytics"
-          isExpanded={isExpanded}
-          active={pathname === "/SolarAnalytics"}
-        />
-        <SidebarItem
-          icon={FaBolt}
-          text="Power Analytics"
-          href="/PowerAnalytics"
-          isExpanded={isExpanded}
-          active={pathname === "/PowerAnalytics"}
-        />
-        <SidebarItem
-          icon={FaUserAlt}
-          text="User Management"
-          href="/UserManagement"
-          isExpanded={isExpanded}
-          active={pathname === "/UserManagement"}
-        />
+        {allowedPrivileges.includes("SLD") && (
+          <SidebarItem
+            icon={FaProjectDiagram}
+            text="SLD"
+            href="/SingleLineDiagram"
+            isExpanded={isExpanded}
+            active={pathname === "/SingleLineDiagram"}
+          />
+        )}
+        {allowedPrivileges.includes("Suppression") && (
+          <SidebarItem
+            icon={FaChartBar}
+            text="Suppression"
+            href="/SuppressionView"
+            isExpanded={isExpanded}
+            active={pathname === "/SuppressionView"}
+          />
+        )}
+        {allowedPrivileges.includes("Health") && (
+          <SidebarItem
+            icon={FaHeartbeat}
+            text="Health"
+            href="/Health"
+            isExpanded={isExpanded}
+            active={pathname === "/Health"}
+          />
+        )}
+        {allowedPrivileges.includes("Analysis") && (
+          <SidebarItem
+            icon={FaChartLine}
+            text="Analysis"
+            href="/AnalysisTrend"
+            isExpanded={isExpanded}
+            active={pathname === "/AnalysisTrend"}
+          />
+        )}
+        {allowedPrivileges.includes("Solar Analytics") && (
+          <SidebarItem
+            icon={FaSolarPanel}
+            text="Solar Analytics"
+            href="/SolarAnalytics"
+            isExpanded={isExpanded}
+            active={pathname === "/SolarAnalytics"}
+          />
+        )}
+        {allowedPrivileges.includes("Power Analytics") && (
+          <SidebarItem
+            icon={FaBolt}
+            text="Power Analytics"
+            href="/PowerAnalytics"
+            isExpanded={isExpanded}
+            active={pathname === "/PowerAnalytics"}
+          />
+        )}
+        {allowedPrivileges.includes("User Management") && (
+          <SidebarItem
+            icon={FaUserAlt}
+            text="User Management"
+            href="/UserManagement"
+            isExpanded={isExpanded}
+            active={pathname === "/UserManagement"}
+          />
+        )}
+
+        {/* Logout Button */}
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 text-white px-3 py-3 rounded-md transition w-full cursor-pointer bg-red-600 hover:bg-red-700"
