@@ -6,7 +6,8 @@ import config from "@/config";
 
 export default function SolarSources({ option }) {
   const [solarData, setSolarData] = useState(0);
-  const [otherSources, setOtherSources] = useState(0); // New state for Other Sources
+  const [otherSources, setOtherSources] = useState(0);
+  const [pvSufficiency, setPvSufficiency] = useState(0); // New state for PV Sufficiency
 
   useEffect(() => {
     let isMounted = true;
@@ -27,7 +28,6 @@ export default function SolarSources({ option }) {
         const response = await axios.post(`${config.BASE_URL}dashboard/get_dash_active_stat_data`, { option });
         const data = response.data;
         if (isMounted) {
-          // Extract first value from the object response
           const activePowerSum = Object.values(data)[0] ?? 0;
           setOtherSources(activePowerSum);
         }
@@ -36,9 +36,21 @@ export default function SolarSources({ option }) {
       }
     }
 
+    async function fetchPvSufficiencyData() {
+      try {
+        const response = await axios.post(`${config.BASE_URL}dashboard/get_dash_pv_sufficiency`, { option });
+        if (isMounted) {
+          setPvSufficiency(response.data.PV_Sufficiency ?? 0);
+        }
+      } catch (error) {
+        console.error("Error fetching PV sufficiency data:", error);
+      }
+    }
+
     if (option) {
       fetchSolarData();
       fetchOtherSourcesData();
+      fetchPvSufficiencyData();
     }
 
     return () => {
@@ -64,11 +76,11 @@ export default function SolarSources({ option }) {
       <div className="flex justify-center space-x-20">
         <div className="text-center">
           <p className="custom-header !w-[260px]">PV SUFFICIENCY</p>
-          <p className="text-2xl font-digital mt-3">0 KW</p>
+          <p className="text-2xl font-digital mt-3">{pvSufficiency.toFixed(2)} %</p>
         </div>
         <div className="text-center">
           <p className="custom-header !w-[260px]">ALLOWED PV CONSUMPTION</p>
-          <p className="text-2xl font-digital mt-3">0 KW</p>
+          <p className="text-2xl font-digital mt-3">100 %</p>
         </div>
       </div>
     </div>

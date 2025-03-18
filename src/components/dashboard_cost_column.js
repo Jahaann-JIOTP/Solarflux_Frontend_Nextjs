@@ -100,6 +100,9 @@ const SolarCostChart = ({ option }) => {
               grid: {
                 color: 'rgba(255, 255, 255, 0.1)',
               },
+              afterDataLimits: (scale) => {
+                scale.max *= 1.21; // Increase Y-axis max by 1%
+              },
             },
             x: {
               grid: {
@@ -110,6 +113,7 @@ const SolarCostChart = ({ option }) => {
               },
             },
           },
+          
           plugins: {
             legend: { display: false },
             tooltip: {
@@ -149,8 +153,8 @@ const SolarCostChart = ({ option }) => {
   }, [option]);
 
   return (
-    <div>
-      <canvas ref={chartRef} style={{ height: '20vh' }}></canvas>
+    <div style={{ height: "20vh",width:"95%" }}>
+      <canvas ref={chartRef}></canvas>
     </div>
   );
 };

@@ -22,20 +22,23 @@ export default function DashboardLayout({ children }) {
     if (pathname.includes("UserManagement")) return "USER MANAGEMENT";
     if (pathname.includes("Dashboard")) return "DASHBOARD";
     if (pathname.includes("NationWide")) return "COUNTRY LEVEL";
-    if (pathname.includes("Settings")) return "Settings";
-    if (pathname.includes("Reports")) return "Reports";
-    if (pathname.includes("SingleLineDiagram")) return "Single Line Diagram";
+    if (pathname.includes("PlantLevel")) return "PLANT LEVEL";
+    if (pathname.includes("InvertorLevel")) return "INVERTER LEVEL";
+    if (pathname.includes("TrendAnalysis")) return "TREND ANALYSIS";
+    if (pathname.includes("Settings")) return "SETTINGS";
+    if (pathname.includes("Reports")) return "REPORTS";
+    if (pathname.includes("SingleLineDiagram")) return "SINGLE LINE DIAGRAM";
     return "Dashboard"; // Default title
   };
 
 
   return (
-    <div className={`h-screen w-screen flex overflow-hidden`}>
+    <div className={`h-screen w-screen flex overflow-hidden bg-black`}>
       {/* Sidebar (Fixed) */}
       <Sidebar />
 
       {/* Main Content Wrapper */}
-      <div className="flex flex-col flex-grow h-full ml-[90px] min-h-0 overflow-auto" id="main-section">
+      <div className="flex flex-col flex-grow h-full ml-[90px] min-h-0 overflow-hidden" id="main-section">
         {/* Header */}
         <main className={`p-6 flex-grow text-white h-full`}>
           <div className="ml-[1%] grid grid-cols-12 gap-5 w-[99%] h-[95%] rounded-lg bg-black/75">

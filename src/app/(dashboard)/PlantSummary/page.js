@@ -1,5 +1,7 @@
 "use client";
-import EnergyChart from "@/components/dashboard_area";
+import dynamic from "next/dynamic";
+
+const EnergyChart = dynamic(() => import("@/components/dashboard_area"), { ssr: false });
 import SolarCostChart from "@/components/dashboard_cost_column";
 import DonutChart from "@/components/dashboard_dounut";
 import SolarProductionChart from "@/components/dashboard_production_column";
@@ -37,7 +39,8 @@ export default function PlantSummary() {
 
         {/* Center Column - Pakistan Map */}
         <div className="relative flex justify-center items-center">
-          <div className="flex justify-center ml-[50px] items-center py-2 gap-3 mt-[-550] z-[9999]">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex items-center py-2 gap-3 z-[9999] ml-5 mt-1">
+
             {["last day", "month", "year"].map((period) => (
               <button
                 key={period}
@@ -61,13 +64,12 @@ export default function PlantSummary() {
             />
           </div>
         </div>
-
         {/* Right Column */}
         <div className="flex flex-col z-10">
           <ChartCard title="CONSUMPTION COMPARISON">
             <EnergyChart option={optionMap[activeButton]} />
           </ChartCard>
-          <ChartCard title="COST AND CONSUMPTION">
+           <ChartCard title="COST AND CONSUMPTION">
             <SolarProductionChart option={optionMap[activeButton]} />
           </ChartCard>
           <ChartCard title="SUSTAINABILITY GOALS">

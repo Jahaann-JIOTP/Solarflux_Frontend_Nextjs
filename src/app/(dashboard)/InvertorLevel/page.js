@@ -5,7 +5,7 @@ import InverterSankeyChart from "@/components/InverterSankeyChart";
 export default function InverterLevel() {
     return (
         <div className="mt-[10px]">
-            <div className="h-[80vh] ml-2 text-white overflow-auto" id="main-section">
+            <div className="h-[85vh] ml-2 text-white overflow-hidden">
                 <InverterSankeyChart />
             </div>
         </div>

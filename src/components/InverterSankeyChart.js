@@ -6,11 +6,13 @@ import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
-
+import config from "@/config";
 export default function InverterSankeyChart() {
   const [selectedPlant, setSelectedPlant] = useState("Coca Cola Faisalabad");
   const [selectedInverter, setSelectedInverter] = useState("");
   const [inverterOptions, setInverterOptions] = useState([]);
+  const baseUrl = config.BASE_URL;
+  const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState([
     moment().subtract(29, "days").toDate(),
     moment().subtract(1, "days").toDate(),
@@ -28,7 +30,7 @@ export default function InverterSankeyChart() {
 
   const fetchInverters = async () => {
     try {
-      const response = await fetch("https://solarfluxapi.nexalyze.com/get-devices", {
+      const response = await fetch(`${baseUrl}production/get-devices`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ station: selectedPlant }),
@@ -53,6 +55,8 @@ export default function InverterSankeyChart() {
       return;
     }
 
+    setLoading(true); // Show loader before fetching data
+
     const payload = {
       Plant: selectedPlant,
       devId: selectedInverter,
@@ -63,7 +67,7 @@ export default function InverterSankeyChart() {
     console.log("📡 Sending API Request with Payload:", payload);
 
     try {
-      const response = await fetch("https://solarfluxapi.nexalyze.com/sankey-data-mppts", {
+      const response = await fetch(`${baseUrl}production/sankey-data-mppts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -75,6 +79,8 @@ export default function InverterSankeyChart() {
       updateChartData(data);
     } catch (error) {
       console.error("❌ Error fetching Sankey data:", error);
+    } finally {
+      setLoading(false); // Hide loader after data fetch
     }
   };
 
@@ -177,8 +183,16 @@ export default function InverterSankeyChart() {
       </div>
 
       {/* Chart Container */}
-      <div className="w-full h-[1200px] pt-[50px] mt-[20px] overflow-hidden bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
-        <div id="chartdiv" className="w-full h-[90%]"></div>
+      <div
+        id="main-section"
+        className="w-full h-[75vh] pt-[10px] mt-[20px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
+      >
+        {loading && (
+          <div className="flex justify-center items-center h-full w-full">
+          <div className="loader"></div>
+        </div>
+        )}
+        <div id="chartdiv" className={`w-full h-[130vh] ${loading ? "hidden" : ""}`}></div>
       </div>
     </div>
   );

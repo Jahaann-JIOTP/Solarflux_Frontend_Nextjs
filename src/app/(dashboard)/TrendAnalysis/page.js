@@ -2,13 +2,13 @@
 
 import dynamic from "next/dynamic";
 
-const SingleLineDiagramDetails = dynamic(() => import("@/components/sld_diagram"), { ssr: false });
+const ChartComponent = dynamic(() => import("@/components/trend_analysis"), { ssr: false });
 
-export default function SingleLineDiagram() {
+export default function TrendAnalysis() {
     return (
         <div className="mt-[10px]">
             <div className="h-[85vh] ml-2 text-white overflow-hidden">
-                <SingleLineDiagramDetails />
+                <ChartComponent />
             </div>
         </div>
     );

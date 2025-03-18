@@ -6,10 +6,12 @@ import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
-
+import config from "@/config";
 export default function NationWide() {
   const [selectedOption2, setSelectedOption2] = useState(2);
   const [selectedOption3, setSelectedOption3] = useState(3);
+  const baseUrl = config.BASE_URL;
+  const [loading, setLoading] = useState(false);
   const [dropdown3Options, setDropdown3Options] = useState([
     { value: 3, label: "City" },
     { value: 5, label: "Plant" },
@@ -43,6 +45,7 @@ export default function NationWide() {
   };
 
   const fetchSankeyData = async () => {
+    setLoading(true);
     const payload = {
       options: [1, selectedOption2, selectedOption3].filter((o) => o),
       start_date: moment(dateRange[0]).format("YYYY-MM-DD"),
@@ -50,7 +53,7 @@ export default function NationWide() {
     };
 
     try {
-      const response = await fetch("https://solarfluxapi.nexalyze.com/sankey", {
+      const response = await fetch(`${baseUrl}production/sankey`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -62,6 +65,9 @@ export default function NationWide() {
       updateChartData(data);
     } catch (error) {
       console.error("Error fetching Sankey data:", error);
+    }
+    finally {
+      setLoading(false); // Hide loader after data fetch
     }
   };
 
@@ -177,8 +183,16 @@ export default function NationWide() {
       </div>
 
       {/* Chart Container */}
-      <div className="w-full h-[70vh] pt-[50px] mt-[20px] overflow-hidden bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
-        <div id="chartdiv" className="w-full h-[90%]"></div>
+      <div
+        id="main-section"
+        className="w-full h-[75vh] pt-[10px] mt-[20px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
+      >
+        {loading && (
+          <div className="flex justify-center items-center h-full w-full">
+          <div className="loader"></div>
+        </div>
+        )}
+        <div id="chartdiv" className={`w-full h-[40vh] mt-[100px] ${loading ? "hidden" : ""}`}></div>
       </div>
     </div>
   );

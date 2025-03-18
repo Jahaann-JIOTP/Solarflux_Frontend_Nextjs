@@ -104,19 +104,28 @@ export default function SolarSuppressionChart({ option }) {
           scales: {
             y: {
               ticks: {
-                color: "white",
+                color: 'white',
                 beginAtZero: true,
-                callback: (value) =>
-                  value >= 1000000 ? `${Math.floor(value / 1000000)}M` : value >= 1000 ? `${Math.floor(value / 1000)}K` : value,
+                callback: (value) => {
+                  if (value >= 1000000) return `${Math.floor(value / 1000000)}M`;
+                  if (value >= 1000) return `${Math.floor(value / 1000)}K`;
+                  return value;
+                },
               },
-              grid: { color: "rgba(255, 255, 255, 0.1)" },
-              afterFit: (scale) => {
-                scale.paddingTop = 20;
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)',
+              },
+              afterDataLimits: (scale) => {
+                scale.max *= 1.21; // Increase Y-axis max by 1%
               },
             },
             x: {
-              grid: { color: "rgba(255, 255, 255, 0.1)" },
-              ticks: { color: "white" },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)',
+              },
+              ticks: {
+                color: 'white',
+              },
             },
           },
           plugins: {
@@ -155,8 +164,8 @@ export default function SolarSuppressionChart({ option }) {
   }, [option]);
 
   return (
-    <div>
-      <canvas ref={chartRef} style={{ height: "20vh" }}></canvas>
+    <div style={{ height: "20vh",width:"95%" }}>
+      <canvas ref={chartRef}></canvas>
     </div>
   );
 }

@@ -135,7 +135,7 @@ const DonutChart = ({ option }) => {
   };
 
   return (
-    <div style={{ height: '18vh' }}>
+    <div style={{ height: "20vh",width:"100%" }}>
       <Doughnut data={data} options={options} ref={chartRef} />
     </div>
   );

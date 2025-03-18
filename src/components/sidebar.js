@@ -136,7 +136,7 @@ export default function Sidebar() {
       <div className="border-t border-gray-500 w-full my-2"></div>
 
       {/* Sidebar Menu */}
-      <nav className="flex flex-col w-full space-y-1 relative">
+      <nav className="flex justify-center items-center flex-col w-full space-y-1 relative">
         {allowedPrivileges.includes("Dashboard") && (
           <SidebarItem
             icon={FaTachometerAlt}
@@ -151,7 +151,7 @@ export default function Sidebar() {
         {allowedPrivileges.includes("Production") && (
           <div className="relative">
             <div
-              className={`flex items-center space-x-3 px-3 text-white p-2 rounded-md transition w-full cursor-pointer ${
+              className={`flex items-center space-x-3 px-2 text-white p-2 rounded-md transition w-full cursor-pointer ${
                 isProductionActive ? "text-[#bf4a63]" : ""
               }`}
               onClick={() => setIsProductionOpen(!isProductionOpen)}
@@ -243,9 +243,9 @@ export default function Sidebar() {
           <SidebarItem
             icon={FaChartLine}
             text="Analysis"
-            href="/AnalysisTrend"
+            href="/TrendAnalysis"
             isExpanded={isExpanded}
-            active={pathname === "/AnalysisTrend"}
+            active={pathname === "/TrendAnalysis"}
           />
         )}
         {allowedPrivileges.includes("Solar Analytics") && (
@@ -278,12 +278,13 @@ export default function Sidebar() {
 
         {/* Logout Button */}
         <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 text-white px-3 py-3 rounded-md transition w-full cursor-pointer bg-red-600 hover:bg-red-700"
-        >
-          <FaSignOutAlt className="text-lg" />
-          {isExpanded && <span className="text-[12px]">Logout</span>}
-        </button>
+  onClick={handleLogout}
+  className="flex justify-center items-center gap-3 text-white px-3 py-3 rounded-md transition w-full cursor-pointer bg-[#bf4a63]"
+>
+  <FaSignOutAlt className="text-lg" />
+  {isExpanded && <span className="text-[12px]">Logout</span>}
+</button>
+
       </nav>
 
       <div className="flex-grow"></div>
