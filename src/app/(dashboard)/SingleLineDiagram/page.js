@@ -7,7 +7,7 @@ const SingleLineDiagramDetails = dynamic(() => import("@/components/sld_diagram"
 export default function SingleLineDiagram() {
     return (
         <div className="mt-[0px]">
-            <div className="h-[86vh] text-white overflow-hidden">
+            <div className="h-[85vh] ml-2 text-white overflow-hidden">
                 <SingleLineDiagramDetails />
             </div>
         </div>

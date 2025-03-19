@@ -153,7 +153,7 @@ const SingleLineDiagramDetails = () => {
             setDateRange(formValues.date);
             fetchChartData();
           }}
-          className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+          className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
         >
           Generate
         </button>
@@ -161,25 +161,16 @@ const SingleLineDiagramDetails = () => {
 
       <div
         id="main-section"
-        className="w-full h-[77vh] pt-[10px] mt-[20px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
+        className="w-full h-[75vh] pt-[10px] mt-[20px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
       >
-        {loading ? (
-          // ✅ Center the loader inside the full height of main-section
+        {loading && (
           <div className="flex justify-center items-center h-full w-full">
             <div className="loader"></div>
           </div>
-        ) : error ? (
-          <p style={{ color: "red" }}>{error}</p>
-        ) : chartData ? (
-          // ✅ Ensure chart only appears when chartData is available
-          <div
-            id="chart-container"
-            ref={chartContainer}
-            className="w-full h-auto mt-[30px]"
-          ></div>
-        ) : (
-          <p className="text-white">No data available</p>
         )}
+        <div  id="chart-container"
+            ref={chartContainer}
+            className="w-full h-auto mt-[30px]"></div>
       </div>
     </div>
   );

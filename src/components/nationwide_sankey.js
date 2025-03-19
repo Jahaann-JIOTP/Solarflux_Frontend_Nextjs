@@ -175,7 +175,7 @@ export default function NationWide() {
 
         {/* Generate Button */}
         <button
-          className="px-4 py-1 rounded-md bg-red-500 text-white h-[32px]"
+          className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
           onClick={fetchSankeyData} // ✅ Call API on button click
         >
           Generate

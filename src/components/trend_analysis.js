@@ -15,29 +15,40 @@ export default function ProductionComparison() {
     const [selectedPlant, setSelectedPlant] = useState("Coca Cola Faisalabad");
     const [selectedInverter, setSelectedInverter] = useState("");
     const [selectedMppt, setSelectedMppt] = useState("");
-    const [startDate, setStartDate] = useState(moment().subtract(1, "days").toDate());
-    const [endDate, setEndDate] = useState(moment().toDate());
-    const [customFromDate, setCustomFromDate] = useState(moment().subtract(1, "days").format("YYYY-MM-DD"));
-    const [customToDate, setCustomToDate] = useState(moment().subtract(0, "days").format("YYYY-MM-DD"));
+    const [startDate, setStartDate] = useState(moment().subtract(30, "days").toDate());
+    const [endDate, setEndDate] = useState(moment().subtract(29, "days").toDate());
+    const [customFromDate, setCustomFromDate] = useState(moment().subtract(30, "days").format("YYYY-MM-DD"));
+    const [customToDate, setCustomToDate] = useState(moment().subtract(29, "days").format("YYYY-MM-DD"));
     const [loading, setLoading] = useState(true);
     const [plantOptions, setPlantOptions] = useState([
         { value: "Coca Cola Faisalabad", label: "Coca Cola Faisalabad" },
     ]);
     const [inverterOptions, setInverterOptions] = useState([]);
     const [mpptOptions, setMpptOptions] = useState([]);
-    const [selectedVariable, setSelectedVariable] = useState("power");
+    const [selectedVariable, setSelectedVariable] = useState("Power");
     const chartRef = useRef(null);
 
-    useEffect(() => {
-        fetchDeviceIds();
-        createChart();
-    }, []);
+    const isChartCreated = useRef(false);
+const apiCallTimeout = useRef(null);
 
-    useEffect(() => {
-        if (customFromDate && customToDate) {
+useEffect(() => {
+    if (!isChartCreated.current) {
+        fetchDeviceIds();
+        createChart(); 
+        isChartCreated.current = true;
+    }
+}, []);
+
+useEffect(() => {
+    if (isChartCreated.current) {
+        if (apiCallTimeout.current) clearTimeout(apiCallTimeout.current);
+
+        apiCallTimeout.current = setTimeout(() => {
             createChart();
-        }
-    }, [customFromDate, customToDate, selectedPlant, selectedInverter, selectedMppt, selectedVariable]);
+        }, 500); // Adds slight delay to prevent multiple rapid calls
+    }
+}, [customFromDate, customToDate, selectedPlant, selectedInverter, selectedMppt, selectedVariable]);
+
 
     const fetchDeviceIds = async () => {
         setLoading(true);
@@ -48,9 +59,7 @@ export default function ProductionComparison() {
             setInverterOptions(response.data);
         } catch (error) {
             console.error("Error fetching device IDs:", error);
-        } finally {
-            setLoading(false);
-        }
+        } 
     };
 
     const fetchMpptIds = async () => {
@@ -73,19 +82,20 @@ export default function ProductionComparison() {
     };
 
     const createChart = async () => {
-        setLoading(true);
+        setLoading(true); // Ensure loader is shown at the start
 
         try {
             if (chartRef.current) {
-                chartRef.current.dispose();
+                chartRef.current.dispose(); // Dispose previous chart before creating a new one
             }
 
-            const response = await axios.post(config.BASE_URL + "aggregate-data1", {
+            const response = await axios.post(config.BASE_URL + "analysis/aggregate-data1", {
                 plant: selectedPlant,
                 inverter: selectedInverter || null,
                 mppt: selectedMppt || null,
                 start_date: customFromDate,
                 end_date: customToDate,
+                attribute: selectedVariable
             });
 
             const rawData = response.data;
@@ -118,13 +128,24 @@ export default function ProductionComparison() {
             am4core.useTheme(am4themes_animated);
             const chart = am4core.create("chartdivirradiance", am4charts.XYChart);
             chartRef.current = chart;
+            chart.padding(0, 0, 0, 0);
+            chart.logo.disabled = true;
 
             let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
             dateAxis.renderer.minGridDistance = 60;
+            dateAxis.baseInterval = { timeUnit: "minute", count: 1 };
             dateAxis.renderer.labels.template.fill = am4core.color("#ffffff");
+            dateAxis.renderer.labels.template.fontSize = 12;
+            dateAxis.renderer.grid.template.stroke = am4core.color("#ffffff");
 
             let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+            valueAxis.tooltip.disabled = true;
             valueAxis.renderer.labels.template.fill = am4core.color("#ffffff");
+            valueAxis.renderer.grid.template.stroke = am4core.color("#ffffff");
+            valueAxis.renderer.labels.template.fontSize = 12;
+            valueAxis.extraMax = 0.1;
+            valueAxis.strictMinMax = true;
+            valueAxis.maxPrecision = 2;
 
             Object.keys(processedData)
                 .sort((a, b) => parseInt(a.match(/\d+/) || 0, 10) - parseInt(b.match(/\d+/) || 0, 10))
@@ -134,24 +155,51 @@ export default function ProductionComparison() {
                     series.dataFields.valueY = "value1";
                     series.dataFields.dateX = "date";
                     series.name = sn;
+                    series.tooltipText = `${sn}: {valueY}`;
+                    series.strokeWidth = 2;
                     series.stroke = am4core.color(getColor(index));
+                    series.fillOpacity = 0.5;
+
+                    let gradient = new am4core.LinearGradient();
+                    gradient.addColor(am4core.color(getColor(index)), 1);
+                    gradient.addColor(am4core.color("#ffffff"), 0);
+                    gradient.rotation = 90;
+                    series.fill = gradient;
                 });
 
             chart.legend = new am4charts.Legend();
             chart.legend.position = "bottom";
+            chart.legend.labels.template.fill = am4core.color("#ffffff");
+            chart.legend.markers.template.strokeWidth = 2;
+            chart.legend.markers.template.stroke = am4core.color("#ffffff");
+            chart.legend.valueLabels.template.fill = am4core.color("#ffffff");
 
             chart.cursor = new am4charts.XYCursor();
+            chart.cursor.lineY.opacity = 0;
+
+            chart.events.on("datavalidated", () => {
+                if (chart.series.length > 0 && chart.series.every(s => s.data.length > 0)) {
+                    setLoading(false);
+                }
+            });
+            
+
         } catch (error) {
             console.error("Error creating chart:", error);
-        } finally {
+            setLoading(false); // Hide loader even if error occurs
+        }finally {
             setLoading(false);
         }
     };
 
+
     const getColor = (index) => {
-        const colors = ["#00CCFF", "#6CB4EE", "#A3C1AD", "#4682B4"];
+        const colors = ["#00CCFF", "#6CB4EE", "#A3C1AD", "#4682B4", "#A3C1AD", "#72A0C1", "#7CB9E8", "#00CCFF"];
         return colors[index % colors.length];
     };
+
+
+
 
     return (
         <div className="p-2">
@@ -200,9 +248,9 @@ export default function ProductionComparison() {
                         value={selectedVariable}
                         onChange={(e) => setSelectedVariable(e.target.value)}
                     >
-                        <option value="power">Power</option>
-                        <option value="current">Current</option>
-                        <option value="voltage">Voltage</option>
+                        <option value="Power">Power</option>
+                        <option value="Current">Current</option>
+                        <option value="Voltage">Voltage</option>
                     </select>
                 </div>
             </div>
@@ -245,7 +293,15 @@ export default function ProductionComparison() {
                 id="main-section"
                 className="w-full h-[70vh] pt-[10px] mt-[20px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
             >
-                <div id="chartdivirradiance" className="w-full h-auto mt-[30px]"></div>
+                {loading && (
+                    <div className="flex flex-col justify-center items-center h-[60vh] w-full">
+                        <div className="loader"></div>
+                        <p className="text-white mt-2 text-lg font-semibold">
+                            This action may take some time, please hold on...
+                        </p>
+                    </div>
+                )}
+                <div id="chartdivirradiance" className={`w-full h-[60vh] ${loading ? "hidden" : ""}`}></div>
 
             </div>
         </div>

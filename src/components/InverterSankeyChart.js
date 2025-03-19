@@ -86,30 +86,54 @@ export default function InverterSankeyChart() {
 
   const updateChartData = (sankeyData) => {
     if (window.chart) {
-      window.chart.data = sankeyData.map((item) => ({
+      // Sort nodes by "from" and "to" to ensure proper ordering
+      const sortedData = sankeyData.sort((a, b) => {
+        if (a.source === b.source) {
+          return a.target.localeCompare(b.target);
+        }
+        return a.source.localeCompare(b.source);
+      });
+  
+      // Assign sorted data to the chart
+      window.chart.data = sortedData.map((item) => ({
         from: item.source.replace("[bold]", ""),
         to: item.target.replace("[bold]", ""),
         value: item.value,
       }));
     }
   };
+  
+  
 
   const createChart = () => {
     const chart = am4core.create("chartdiv", am4charts.SankeyDiagram);
     chart.logo.disabled = true;
     chart.padding(50, 120, 10, 10);
-
+  
     chart.dataFields.fromName = "from";
     chart.dataFields.toName = "to";
     chart.dataFields.value = "value";
     chart.nodeWidth = 10;
     chart.nodePadding = 40;
-
+  
+    // Ensure nodes are sorted manually before setting data
+    fetchSankeyData().then((sankeyData) => {
+      if (sankeyData && sankeyData.length > 0) {
+        const sortedData = sankeyData.sort((a, b) => a.source.localeCompare(b.source));
+        
+        chart.data = sortedData.map((item) => ({
+          from: item.source.replace("[bold]", ""),
+          to: item.target.replace("[bold]", ""),
+          value: item.value,
+        }));
+      }
+    });
+  
     const linkTemplate = chart.links.template;
     linkTemplate.colorMode = "gradient";
     linkTemplate.fillOpacity = 0.75;
     linkTemplate.tooltipText = "{fromName} → {toName}: {value} KW";
-
+  
     const nodeTemplate = chart.nodes.template;
     nodeTemplate.nameLabel.label.text = "{name}";
     nodeTemplate.nameLabel.label.wrap = true;
@@ -118,10 +142,11 @@ export default function InverterSankeyChart() {
     nodeTemplate.strokeWidth = 2;
     nodeTemplate.nameLabel.label.fill = am4core.color("#ffffff");
     nodeTemplate.tooltipText = "{name}";
-
+  
     window.chart = chart;
-    fetchSankeyData();
   };
+  
+  
 
   return (
     <div className="p-2">
@@ -175,7 +200,7 @@ export default function InverterSankeyChart() {
 
         {/* Generate Button */}
         <button
-          className="px-4 py-1 rounded-md bg-red-500 text-white h-[32px]"
+          className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
           onClick={fetchSankeyData}
         >
           Generate

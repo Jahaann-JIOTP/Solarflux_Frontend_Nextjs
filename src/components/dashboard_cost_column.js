@@ -55,31 +55,60 @@ const SolarCostChart = ({ option }) => {
         borderColor: 'rgba(75, 192, 192, 2)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
       }));
-
       const addArrowPlugin = {
-        id: 'addArrowPlugin',
+        id: "addArrowPlugin",
         afterDatasetsDraw(chart) {
           const { ctx, data } = chart;
           const dataset = data.datasets[0].data;
+          const labels = data.labels;
           const meta = chart.getDatasetMeta(0).data;
+      
+          if (!dataset.length) return;
+      
+          // Get today's date
+          const today = new Date();
+          const currentMonth = today.toLocaleString("default", { month: "short" }); // e.g., "Mar"
+          const currentYear = today.getFullYear().toString(); // e.g., "2025"
+      
+          let targetIndex = null;
+      
+          if (option === 1) {
+            // Option 1: Find the bar with the highest date (latest entry)
+            targetIndex = labels.length - 1;
+          } else if (option === 2) {
+            // Option 2: Find the current month in labels
+            targetIndex = labels.findIndex(label => label.includes(currentMonth));
+          } else if (option === 3) {
+            // Option 3: Find the current year in labels
+            targetIndex = labels.findIndex(label => label.includes(currentYear));
+          }
+      
+          if (targetIndex !== null && targetIndex !== -1) {
+            const targetValue = dataset[targetIndex];
+      
+            // Compare with previous value (if it exists)
+            const compareIndex = targetIndex > 0 ? targetIndex - 1 : targetIndex + 1;
+            const compareValue = dataset[compareIndex] !== undefined ? dataset[compareIndex] : targetValue;
+            if (targetValue === 0 && compareValue === 0) return;
 
-          dataset.forEach((value, index) => {
-            let compareValue = index === 0 ? dataset[index + 1] : dataset[index - 1];
-            if (compareValue !== undefined && value > compareValue) {
-              const barLeftX = meta[index].x - meta[index].width / 2;
-              const barMiddleY = (meta[index].y + chart.scales.y.getPixelForValue(0)) / 2;
-
-              ctx.save();
-              ctx.fillStyle = 'rgba(255, 99, 132)';
-              ctx.textAlign = 'center';
-              ctx.font = 'bold 20px Arial';
-              ctx.fillText('\u2B06', barLeftX - 10, barMiddleY);
-              ctx.restore();
-            }
-          });
+            const isHigher = targetValue > compareValue;
+            const arrow = isHigher ? "\u2B06" : "\u2B07"; // ⬆️ or ⬇️
+            const color = isHigher ? "green" : "red";
+      
+            // Arrow Positioning (Same as Before)
+            const barLeftX = meta[targetIndex].x - meta[targetIndex].width / 2;
+            const barMiddleY = (meta[targetIndex].y + chart.scales.y.getPixelForValue(0)) / 2;
+      
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.textAlign = "center";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText(arrow, barLeftX - 10, barMiddleY);
+            ctx.restore();
+          }
         },
       };
-
+      
       solarCostChart.current = new Chart(ctx, {
         type: 'bar',
         data: { labels, datasets: formattedDatasets },

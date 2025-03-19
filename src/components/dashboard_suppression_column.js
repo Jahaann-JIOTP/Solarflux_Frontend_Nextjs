@@ -41,17 +41,22 @@ export default function SolarSuppressionChart({ option }) {
             option === 1 ? entry.Date : option === 2 ? entry.Month : entry.Year
           );
 
+          const suppressionValues = response.data.map((entry) => entry.Suppression || 0);
+          
+          // Find the index of the highest date, month, or year
+          const highestIndex = suppressionValues.length - 1;
+
           const datasets = [
             {
               label: "Suppression",
-              data: response.data.map((entry) => entry.Suppression || 0),
+              data: suppressionValues,
               backgroundColor: "rgba(255, 99, 132, 0.2)",
               borderColor: "rgba(255, 99, 132, 1)",
               borderWidth: 2,
             },
           ];
 
-          createChart(labels, datasets);
+          createChart(labels, datasets, highestIndex);
         } else {
           console.error("Invalid chart data:", response.data);
         }
@@ -60,7 +65,7 @@ export default function SolarSuppressionChart({ option }) {
       }
     };
 
-    const createChart = (labels, datasets) => {
+    const createChart = (labels, datasets, highestIndex) => {
       if (!chartRef.current) return;
 
       if (chartInstance) {
@@ -69,32 +74,43 @@ export default function SolarSuppressionChart({ option }) {
 
       const ctx = chartRef.current.getContext("2d");
 
-      // Custom arrow plugin for higher bar values
+      // Custom arrow plugin for the highest date, month, or year
       const addArrowPlugin = {
         id: "addArrowPlugin",
         afterDatasetsDraw(chart) {
           const { ctx, data } = chart;
           const dataset = data.datasets[0].data;
           const meta = chart.getDatasetMeta(0).data;
-
-          dataset.forEach((value, index) => {
-            let compareValue = index === 0 && dataset.length > 1 ? dataset[index + 1] : dataset[index - 1];
-
-            if (compareValue !== null && value > compareValue) {
-              const barLeftX = meta[index].x - meta[index].width / 2;
-              const barMiddleY = (meta[index].y + chart.scales.y.getPixelForValue(0)) / 2;
-
-              ctx.save();
-              ctx.fillStyle = "rgba(255, 99, 132)";
-              ctx.textAlign = "center";
-              ctx.font = "bold 16px Arial";
-              ctx.fillText("⬆", barLeftX - 10, barMiddleY);
-              ctx.restore();
-            }
-          });
+      
+          if (dataset.length === 0 || highestIndex < 0) return;
+      
+          // Get the highest column value
+          const highestValue = dataset[highestIndex];
+      
+          // Find the max value in the dataset excluding the highestIndex column
+          const maxOtherValue = Math.max(...dataset.filter((_, index) => index !== highestIndex));
+      
+          // Condition to hide the arrow if both values are 0
+          if (highestValue === 0 && maxOtherValue === 0) return;
+      
+          // Determine arrow direction and color
+          const isHigher = highestValue > maxOtherValue;
+          const arrow = isHigher ? "\u2B06" : "\u2B07"; // ⬆️ (Up) or ⬇️ (Down)
+          const color = isHigher ? "rgba(0, 255, 0, 1)" : "rgba(255, 0, 0, 1)"; // Green for up, Red for down
+      
+          // Positioning the arrow
+          const barLeftX = meta[highestIndex].x - meta[highestIndex].width / 2;
+          const barMiddleY = (meta[highestIndex].y + chart.scales.y.getPixelForValue(0)) / 2;
+      
+          ctx.save();
+          ctx.fillStyle = color; // Apply color based on condition
+          ctx.textAlign = "center";
+          ctx.font = "bold 20px Arial";
+          ctx.fillText(arrow, barLeftX - 10, barMiddleY);
+          ctx.restore();
         },
       };
-
+      
       const newChartInstance = new Chart(ctx, {
         type: "bar",
         data: { labels, datasets },
@@ -164,7 +180,7 @@ export default function SolarSuppressionChart({ option }) {
   }, [option]);
 
   return (
-    <div style={{ height: "20vh",width:"95%" }}>
+    <div style={{ height: "20vh", width: "95%" }}>
       <canvas ref={chartRef}></canvas>
     </div>
   );
