@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation"; // ✅ Import Router for Redirect
 import axios from "axios";
 import Swal from "sweetalert2"; // ✅ Import SweetAlert for notifications
 
-const API_BASE_URL = "http://localhost:5000"; // ✅ Backend URL
+const API_BASE_URL = "http://15.206.128.214:5000"; // ✅ Backend URL
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);

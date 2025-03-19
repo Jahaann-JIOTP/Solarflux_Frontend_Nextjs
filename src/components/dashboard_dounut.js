@@ -88,7 +88,7 @@ const DonutChart = ({ option }) => {
   }, [option]);
 
   const data = {
-    labels: ['Suppression', 'Remaining'],
+    labels: ['Suppressed', 'Consumed'],
     datasets: [
       {
         label: 'Suppression Data',

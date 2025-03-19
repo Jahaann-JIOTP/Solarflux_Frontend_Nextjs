@@ -50,7 +50,7 @@ export default function SolarProductionChart({ option }) {
       const trimmedLineDatasets = datasets
         .filter(dataset => dataset.type === "bar")
         .map(dataset => ({
-          label: `${dataset.label} (x60)`, 
+          label: `COST (x60)`, 
           data: selectedIndexes.map(index => 
             dataset.data[index] !== undefined && dataset.data[index] !== null ? dataset.data[index] * 60 : 0
           ), // Keep only selected values and multiply by 60
@@ -96,7 +96,7 @@ export default function SolarProductionChart({ option }) {
                   value >= 1000 ? `${value / 1000}K` :
                   value,
               },
-              title: { display: true, text: "Power (KW x 60)", color: "white", font: { size: 12 } },
+              title: { display: true, text: "COST", color: "white", font: { size: 12 } },
             },
             x: {
               grid: { color: "rgba(255, 255, 255, 0.1)" },

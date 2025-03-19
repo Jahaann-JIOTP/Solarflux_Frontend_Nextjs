@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }) {
       <Sidebar />
 
       {/* Main Content Wrapper */}
-      <div className="flex flex-col flex-grow h-full ml-[90px] min-h-0 overflow-hidden" id="main-section">
+      <div className="flex flex-col flex-grow h-full ml-[90px] min-h-0 overflow-auto" id="main-section">
         {/* Header */}
         <main className={`p-6 flex-grow text-white h-full`}>
           <div className="ml-[1%] grid grid-cols-12 gap-5 w-[99%] h-[95%] rounded-lg bg-black/75">

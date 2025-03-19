@@ -63,11 +63,11 @@ export default function SolarSources({ option }) {
       {/* First Row */}
       <div className="flex justify-center space-x-20">
         <div className="text-center">
-          <p className="custom-header !w-[260px]">SOLAR</p>
+          <p className="custom-header !w-[260px]">PV CONSUMPTION</p>
           <p className="text-2xl font-digital mt-3">{solarData} KW</p>
         </div>
         <div className="text-center">
-          <p className="custom-header !w-[260px]">OTHER SOURCES</p>
+          <p className="custom-header !w-[260px]">NON PV CONSUMPTION</p>
           <p className="text-2xl font-digital mt-3">{otherSources} KW</p>
         </div>
       </div>

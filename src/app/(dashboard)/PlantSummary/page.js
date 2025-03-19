@@ -26,7 +26,7 @@ export default function PlantSummary() {
       <div className="grid grid-cols-3 gap-36 mt-[-20px]">
         {/* Left Column */}
         <div className="flex flex-col z-10">
-          <ChartCard title="ENERGY SPLIT">
+          <ChartCard title="PV ENERGY">
             <DonutChart option={optionMap[activeButton]} />
           </ChartCard>
           <ChartCard title="CHANGE IN CONSUMPTION">

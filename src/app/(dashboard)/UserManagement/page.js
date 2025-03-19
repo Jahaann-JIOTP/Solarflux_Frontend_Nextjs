@@ -16,7 +16,7 @@ export default function UserManagement() {
     privileges: [],
   });
 
-  const API_BASE_URL = "http://localhost:5000";
+  const API_BASE_URL = "http://15.206.128.214:5000";
   const [token, setToken] = useState(null);
   const [showRolePopup, setShowRolePopup] = useState(false);
   const [newRole, setNewRole] = useState("");
@@ -519,7 +519,7 @@ export default function UserManagement() {
           <table className="w-full text-white border border-gray-600">
             <thead>
               <tr className="bg-gray-800">
-                <th className="p-2 border">ID</th>
+                {/* <th className="p-2 border">ID</th> */}
                 <th className="p-2 border">Name</th>
                 <th className="p-2 border">Email</th>
                 <th className="p-2 border">Role</th>
@@ -532,7 +532,7 @@ export default function UserManagement() {
                   key={user._id || user.id}
                   className="hover:bg-gray-700 text-center"
                 >
-                  <td className="p-2 border">{user._id || user.id}</td>
+                  {/* <td className="p-2 border">{user._id || user.id}</td> */}
                   <td className="p-2 border">{user.name}</td>
                   <td className="p-2 border">{user.email}</td>
                   <td className="p-2 border">{user.role?.name || "N/A"}</td>

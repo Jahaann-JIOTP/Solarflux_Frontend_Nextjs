@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"; // ✅ Import useRouter for redirec
 import axios from "axios";
 import Swal from "sweetalert2"; // ✅ Import SweetAlert for notifications
 
-const API_BASE_URL = "http://localhost:5000"; // ✅ Backend URL
+const API_BASE_URL = "http://15.206.128.214:5000"; // ✅ Backend URL
 
 export default function Login() {
   const router = useRouter();
@@ -53,7 +53,7 @@ export default function Login() {
         Swal.fire({
           icon: "success",
           title: "Login Successful!",
-          text: "Redirecting to Plant Summary...",
+          // text: "Redirecting to Plant Summary...",
           background: "#222D3B",
           color: "#ffffff",
           showConfirmButton: false,
