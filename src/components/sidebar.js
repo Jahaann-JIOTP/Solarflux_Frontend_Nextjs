@@ -114,13 +114,19 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed top-2 left-2 h-[95vh] ${
+      className={`fixed top-4 left-3 h-[95vh] ${
         isExpanded ? "w-60" : "w-[90px]"
       } bg-[#0D2D42] rounded-2xl p-5 flex flex-col items-center transition-all duration-300 ease-in-out z-[9999] shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]`}
     >
       {/* Toggle Button */}
+     
+
+      {/* Logo */}
+      <img src="/shams.png" alt="Logo" className="max-w-none" />
+
+      <div className="border-t border-gray-500 w-full my-2"></div>
       <button
-        className="text-white mb-4 absolute top-[45px] right-[-25px] bg-[#0D2D42] rounded-xl p-2 "
+        className="text-white bg-[#0D2D42] rounded-xl p-2 "
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <FaChevronLeft
@@ -129,14 +135,9 @@ export default function Sidebar() {
           }`}
         />
       </button>
-
-      {/* Logo */}
-      <img src="/shams.png" alt="Logo" className="max-w-none" />
-
       <div className="border-t border-gray-500 w-full my-2"></div>
-
       {/* Sidebar Menu */}
-      <nav className="flex justify-center items-center flex-col w-full space-y-1 relative">
+      <nav className={`flex justify-center ${isExpanded ? "" : "items-center"}  flex-col w-full space-y-1 relative"`}>
         {allowedPrivileges.includes("Dashboard") && (
           <SidebarItem
             icon={FaTachometerAlt}
@@ -293,7 +294,7 @@ export default function Sidebar() {
       <img
         src="/company.png"
         alt="Footer Logo"
-        className="h-[90px] mt-4 max-w-none"
+        className="h-[70px] mt-4 mb-[-10px] max-w-none"
       />
     </aside>
   );

@@ -169,24 +169,7 @@ body {
   width: 100%;
 }
 
-.custom-header::before,
-.custom-header::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 10px;
-  height: 2px;
-  background-color: #00e0ff;
-  transform: translateY(-50%);
-}
 
-.custom-header::before {
-  left: -20px;
-}
-
-.custom-header::after {
-  right: -20px;
-}
 
 .chart-container1 {
   width: 100% !important;

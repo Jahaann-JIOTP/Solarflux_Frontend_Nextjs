@@ -56,11 +56,11 @@ export default function PlantSummary() {
               </button>
             ))}
           </div>
-          <div className="absolute inset-0 flex justify-center items-center">
+          <div className="absolute inset-0 flex justify-center items-center mt-[-100px]">
             <img
               src="/pakistanbg.png"
               alt="Pakistan Map"
-              className="w-full object-cover scale-300"
+              className="w-full object-cover scale-250"
             />
           </div>
         </div>

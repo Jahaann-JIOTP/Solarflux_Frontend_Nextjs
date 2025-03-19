@@ -59,16 +59,16 @@ export default function SolarSources({ option }) {
   }, [option]);
 
   return (
-    <div className="flex flex-col items-center mt-[-80px] space-y-6 z-10">
+    <div className="flex flex-col items-center mt-[-12.3vw] space-y-6 z-10">
       {/* First Row */}
       <div className="flex justify-center space-x-20">
         <div className="text-center">
           <p className="custom-header !w-[260px]">PV CONSUMPTION</p>
-          <p className="text-2xl font-digital mt-3">{solarData} KW</p>
+          <p className="text-2xl font-digital mt-3 !h-[70px]">{solarData} KW</p>
         </div>
         <div className="text-center">
           <p className="custom-header !w-[260px]">NON PV CONSUMPTION</p>
-          <p className="text-2xl font-digital mt-3">{otherSources} KW</p>
+          <p className="text-2xl font-digital mt-3 !h-[70px]">{otherSources} KW</p>
         </div>
       </div>
 
@@ -76,11 +76,11 @@ export default function SolarSources({ option }) {
       <div className="flex justify-center space-x-20">
         <div className="text-center">
           <p className="custom-header !w-[260px]">PV SUFFICIENCY</p>
-          <p className="text-2xl font-digital mt-3">{pvSufficiency.toFixed(2)} %</p>
+          <p className="text-2xl font-digital mt-3 !h-[70px]">{pvSufficiency.toFixed(2)} %</p>
         </div>
         <div className="text-center">
           <p className="custom-header !w-[260px]">ALLOWED PV CONSUMPTION</p>
-          <p className="text-2xl font-digital mt-3">100 %</p>
+          <p className="text-2xl font-digital mt-3 !h-[70px]">100 %</p>
         </div>
       </div>
     </div>
