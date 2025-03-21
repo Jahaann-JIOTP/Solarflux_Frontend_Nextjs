@@ -24,6 +24,7 @@ export default function DashboardLayout({ children }) {
     if (pathname.includes("NationWide")) return "COUNTRY LEVEL";
     if (pathname.includes("PlantLevel")) return "PLANT LEVEL";
     if (pathname.includes("InvertorLevel")) return "INVERTER LEVEL";
+    if (pathname.includes("SolarAnalytics")) return "SOLAR ANALYTICS";
     if (pathname.includes("TrendAnalysis")) return "TREND ANALYSIS";
     if (pathname.includes("Settings")) return "SETTINGS";
     if (pathname.includes("Reports")) return "REPORTS";

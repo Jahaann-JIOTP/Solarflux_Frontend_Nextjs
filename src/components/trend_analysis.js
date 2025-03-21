@@ -301,7 +301,7 @@ useEffect(() => {
                         </p>
                     </div>
                 )}
-                <div id="chartdivirradiance" className={`w-full h-[60vh] ${loading ? "hidden" : ""}`}></div>
+                <div id="chartdivirradiance" className={`w-full h-[60vh] mt-[40px] ${loading ? "hidden" : ""}`}></div>
 
             </div>
         </div>
