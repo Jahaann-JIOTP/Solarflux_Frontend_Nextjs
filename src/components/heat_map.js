@@ -34,95 +34,108 @@ const ProductionLayeredColumn = ({
     const fetchChartData = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`https://solarfluxapi.nexalyze.com/grouped_data`, {
-                "start_date": "2024-12-07",
-                "end_date": "2024-12-13",
-                "plant": "Coca Cola Faisalabad",
-                "inverter": "",
-                "mppt": "",
-                "string": ""
+            const formattedStartDate = customFromDate ? customFromDate.toISOString().split("T")[0] : "";
+            const formattedEndDate = customToDate ? customToDate.toISOString().split("T")[0] : "";
+    
+            const response = await axios.post(`http://15.206.128.214:5000/solaranalytics/grouped_data`, {
+                start_date: formattedStartDate,
+                end_date: formattedEndDate,
+                plant: selectedOptionplant1,
+                inverter: selectedOptioninverter1,
+                mppt: selectedOptionmppt1,
+                string: selectedOptionstring1
             });
-
+    
             const apiData = response.data;
-            const uniqueWeekdays = [...new Set(apiData.map((item) => item.Day_Hour))];
+    
+            const uniqueDates = [...new Set(apiData.map(item => item.Day_Hour))];
             const hours = Array.from({ length: 24 }, (_, i) => `${i}`);
-
+    
             const groupedData = apiData.reduce((acc, item) => {
                 const key = `${item.Day_Hour}-${item.Hour}`;
                 acc[key] = {
-                    weekday: item.Day_Hour,
+                    date: item.Day_Hour,
                     hour: `${item.Hour}`,
-                    value: item.P_abd_sum,
+                    value: item.P_abd_sum || 0
                 };
                 return acc;
             }, {});
-
+    
             const chartData = [];
-            uniqueWeekdays.forEach((weekday) => {
-                hours.forEach((hour) => {
-                    chartData.push(groupedData[`${weekday}-${hour}`] || { weekday, hour, value: 0 });
+            uniqueDates.forEach(date => {
+                hours.forEach(hour => {
+                    chartData.push(groupedData[`${date}-${hour}`] || {
+                        date,
+                        hour,
+                        value: 0
+                    });
                 });
             });
-
+    
             if (chartRef.current) {
                 chartRef.current.data = chartData;
             }
-
+    
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching chart data:', error);
+            console.error("Error fetching chart data:", error);
             setLoading(false);
         }
     };
+    
+    
+    
+    
 
     const createChart = () => {
         setLoading(true);
-        const chart = am4core.create('chartdiv', am4charts.XYChart);
+        const chart = am4core.create("chartdiv", am4charts.XYChart);
         chartRef.current = chart;
         chart.logo.disabled = true;
         chart.maskBullets = false;
-
+    
         const xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-        xAxis.dataFields.category = 'weekday';
+        xAxis.dataFields.category = "date";
         xAxis.renderer.labels.template.rotation = 90;
-        xAxis.renderer.labels.template.fill = am4core.color('#FFFFFF');
+        xAxis.renderer.labels.template.fill = am4core.color("#FFFFFF");
         xAxis.renderer.labels.template.fontSize = 12;
-
+    
         const yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
-        yAxis.dataFields.category = 'hour';
-        yAxis.renderer.labels.template.fill = am4core.color('#FFFFFF');
+        yAxis.dataFields.category = "hour";
+        yAxis.renderer.labels.template.fill = am4core.color("#FFFFFF");
         yAxis.renderer.labels.template.fontSize = 12;
-
+    
         const series = chart.series.push(new am4charts.ColumnSeries());
-        series.dataFields.categoryX = 'weekday';
-        series.dataFields.categoryY = 'hour';
-        series.dataFields.value = 'value';
+        series.dataFields.categoryX = "date";
+        series.dataFields.categoryY = "hour";
+        series.dataFields.value = "value";
+        series.columns.template.tooltipText = "Date: {date}\nHour: {hour}\nValue: {value.formatNumber('#.##')}";
+        
         series.defaultState.transitionDuration = 3000;
-
-        series.columns.template.tooltipText = 'Date: {weekday}\nHour: {hour}\nValue: {value.workingValue.formatNumber("#.")}';
+    
         series.columns.template.fillOpacity = 1;
         series.columns.template.strokeWidth = 1;
-        series.columns.template.stroke = am4core.color('#E5E4E2');
+        series.columns.template.stroke = am4core.color("#E5E4E2");
         series.columns.template.width = am4core.percent(100);
         series.columns.template.height = am4core.percent(100);
         series.heatRules.push({
             target: series.columns.template,
-            property: 'fill',
-            min: am4core.color('#89CFF0'),
-            max: am4core.color('#AE0000'),
+            property: "fill",
+            min: am4core.color("#89CFF0"),
+            max: am4core.color("#AE0000"),
         });
-
+    
         // Add Heat Legend
         let heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
         heatLegend.width = am4core.percent(100);
         heatLegend.series = series;
-        heatLegend.valueAxis.renderer.labels.template.fill = am4core.color('#FFFFFF');
+        heatLegend.valueAxis.renderer.labels.template.fill = am4core.color("#FFFFFF");
         heatLegend.valueAxis.renderer.labels.template.fontSize = 12;
         heatLegend.valueAxis.renderer.minGridDistance = 30;
-
-        addControls();
+    
         fetchChartData();
     };
+    
 
     const addControls = () => {
         const controlsWrapper = document.getElementById("exportoption4");
