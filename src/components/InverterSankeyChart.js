@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import moment from "moment";
@@ -17,16 +17,20 @@ export default function InverterSankeyChart() {
     moment().subtract(29, "days").toDate(),
     moment().subtract(1, "days").toDate(),
   ]);
-
+  const hasFetchedInitialData = useRef(false);
   useEffect(() => {
-    fetchInverters();
-  }, []);
-
-  useEffect(() => {
-    if (selectedInverter) {
-      createChart();
+    if (selectedInverter && !hasFetchedInitialData.current) {
+      fetchSankeyData();                   // ✅ only on first load
+      hasFetchedInitialData.current = true;
     }
   }, [selectedInverter]);
+  
+  useEffect(() => {
+    createChart(); // initialize empty chart on mount
+    fetchInverters(); // fetch inverter options
+  }, []);
+  
+
 
   const fetchInverters = async () => {
     try {
@@ -44,6 +48,7 @@ export default function InverterSankeyChart() {
       if (data.length > 0) {
         setSelectedInverter(data[0].value);
       }
+
     } catch (error) {
       console.error("❌ Error fetching inverters:", error);
     }
@@ -102,9 +107,6 @@ export default function InverterSankeyChart() {
       }));
     }
   };
-  
-  
-
   const createChart = () => {
     const chart = am4core.create("chartdiv", am4charts.SankeyDiagram);
     chart.logo.disabled = true;
@@ -115,19 +117,6 @@ export default function InverterSankeyChart() {
     chart.dataFields.value = "value";
     chart.nodeWidth = 10;
     chart.nodePadding = 40;
-  
-    // Ensure nodes are sorted manually before setting data
-    fetchSankeyData().then((sankeyData) => {
-      if (sankeyData && sankeyData.length > 0) {
-        const sortedData = sankeyData.sort((a, b) => a.source.localeCompare(b.source));
-        
-        chart.data = sortedData.map((item) => ({
-          from: item.source.replace("[bold]", ""),
-          to: item.target.replace("[bold]", ""),
-          value: item.value,
-        }));
-      }
-    });
   
     const linkTemplate = chart.links.template;
     linkTemplate.colorMode = "gradient";
@@ -146,8 +135,68 @@ export default function InverterSankeyChart() {
     window.chart = chart;
   };
   
-  
+  const addControls = () => {
+    const controlsWrapper = document.getElementById("exportoptionsankeyinverter");
+    controlsWrapper.innerHTML = "";
 
+    const createButton = (svgPath, callback, tooltip) => {
+        const button = document.createElement("button");
+        button.style.backgroundColor = "transparent";
+        button.style.border = "none";
+        button.style.padding = "5px";
+        button.style.cursor = "pointer";
+        button.style.display = "inline-flex";
+        button.style.justifyContent = "center";
+        button.style.alignItems = "center";
+        button.style.width = "30px";
+        button.style.height = "30px";
+        button.style.margin = "2px";
+        button.title = tooltip; // Add tooltip
+
+        button.innerHTML = `
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" 
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                xmlns="http://www.w3.org/2000/svg">
+                ${svgPath}
+            </svg>
+        `;
+
+        button.addEventListener("click", callback);
+        controlsWrapper.appendChild(button);
+    };
+
+    // Export as PNG
+    createButton(
+        `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
+         <rect x="4" y="17" width="16" height="4" rx="1" ry="1" />`,
+        () => { if (chartRef.current) chartRef.current.exporting.export("png"); },
+        "Export as PNG"
+    );
+
+    // Export as XLSX
+    createButton(
+        `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+         <path d="M14 3v5h5M9 17l-3-3m0 0 3-3m-3 3h6" />`,
+        () => { if (chartRef.current) chartRef.current.exporting.export("xlsx"); },
+        "Export as XLSX"
+    );
+
+    // Fullscreen Mode
+    createButton(
+        `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
+        () => {
+            const chartElement = document.getElementById("chartdiv");
+            if (!document.fullscreenElement) {
+                chartElement.requestFullscreen().catch(err => {
+                    console.error("Error attempting to enable fullscreen mode:", err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        },
+        "Toggle Fullscreen"
+    );
+};
   return (
     <div className="p-2">
       {/* Controls */}
@@ -200,23 +249,28 @@ export default function InverterSankeyChart() {
 
         {/* Generate Button */}
         <button
-          className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
-          onClick={fetchSankeyData}
+          className={`px-4 py-1 rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 cursor-pointer text-white hover:bg-blue-600 transition"
+          } text-white transition`}
+          onClick={() => {
+            fetchSankeyData();
+          }}
+          
         >
-          Generate
+          {loading ? "Loading..." : "Generate"}
         </button>
       </div>
 
       {/* Chart Container */}
       <div
         id="main-section"
-        className="w-full h-[75vh] pt-[10px] mt-[20px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
+        className="w-full h-[77vh] pt-[10px] mt-[25px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
       >
         {loading && (
           <div className="flex justify-center items-center h-full w-full">
           <div className="loader"></div>
         </div>
         )}
+        <div id="exportoptionsankeyinverter" className={`${loading ? "hidden" : ""}`} style={{ textAlign: "right", marginBottom: "-10px", marginRight: "10px", marginTop: "20px", zIndex: 999 }}></div>
         <div id="chartdiv" className={`w-full h-[130vh] ${loading ? "hidden" : ""}`}></div>
       </div>
     </div>

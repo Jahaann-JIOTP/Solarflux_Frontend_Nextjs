@@ -36,8 +36,7 @@ const ProductionLayeredColumn = ({
         try {
             const formattedStartDate = customFromDate ? customFromDate.toISOString().split("T")[0] : "";
             const formattedEndDate = customToDate ? customToDate.toISOString().split("T")[0] : "";
-    
-            const response = await axios.post(`http://15.206.128.214:5000/solaranalytics/grouped_data`, {
+            const response = await axios.post(`${baseUrl}solaranalytics/grouped_data`, {
                 start_date: formattedStartDate,
                 end_date: formattedEndDate,
                 plant: selectedOptionplant1,
@@ -82,11 +81,6 @@ const ProductionLayeredColumn = ({
             setLoading(false);
         }
     };
-    
-    
-    
-    
-
     const createChart = () => {
         setLoading(true);
         const chart = am4core.create("chartdiv", am4charts.XYChart);
@@ -96,9 +90,12 @@ const ProductionLayeredColumn = ({
     
         const xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
         xAxis.dataFields.category = "date";
-        xAxis.renderer.labels.template.rotation = 90;
+        xAxis.renderer.labels.template.rotation = 90; // Keep labels vertical
         xAxis.renderer.labels.template.fill = am4core.color("#FFFFFF");
         xAxis.renderer.labels.template.fontSize = 12;
+        xAxis.renderer.minGridDistance = 20; // Adjust spacing
+        xAxis.renderer.labels.template.horizontalCenter = "middle"; // Center labels
+        xAxis.renderer.labels.template.location = 0.5; // Align label with the center of the column
     
         const yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
         yAxis.dataFields.category = "hour";
@@ -110,9 +107,8 @@ const ProductionLayeredColumn = ({
         series.dataFields.categoryY = "hour";
         series.dataFields.value = "value";
         series.columns.template.tooltipText = "Date: {date}\nHour: {hour}\nValue: {value.formatNumber('#.##')}";
-        
-        series.defaultState.transitionDuration = 3000;
     
+        series.defaultState.transitionDuration = 3000;
         series.columns.template.fillOpacity = 1;
         series.columns.template.strokeWidth = 1;
         series.columns.template.stroke = am4core.color("#E5E4E2");
@@ -133,15 +129,14 @@ const ProductionLayeredColumn = ({
         heatLegend.valueAxis.renderer.labels.template.fontSize = 12;
         heatLegend.valueAxis.renderer.minGridDistance = 30;
     
+        addControls();
         fetchChartData();
     };
-    
-
     const addControls = () => {
         const controlsWrapper = document.getElementById("exportoption4");
         controlsWrapper.innerHTML = "";
     
-        const createButton = (svgPath, callback) => {
+        const createButton = (svgPath, callback, tooltip) => {
             const button = document.createElement("button");
             button.style.backgroundColor = "transparent";
             button.style.border = "none";
@@ -150,50 +145,60 @@ const ProductionLayeredColumn = ({
             button.style.display = "inline-flex";
             button.style.justifyContent = "center";
             button.style.alignItems = "center";
-            button.style.width = "40px";
-            button.style.height = "40px";
+            button.style.width = "30px";
+            button.style.height = "30px";
             button.style.margin = "2px";
-        
+            button.title = tooltip; // Add tooltip
+    
             button.innerHTML = `
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" 
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                    xmlns="http://www.w3.org/2000/svg">
                     ${svgPath}
                 </svg>
             `;
-        
+    
             button.addEventListener("click", callback);
             controlsWrapper.appendChild(button);
         };
     
-        // Add buttons with appropriate icons
-        createButton(`<path d="M12 2L15 8H9L12 2ZM2 20V22H22V20H2ZM4 18H20V16H4V18ZM6 14H18V12H6V14ZM8 10H16V8H8V10Z" />`, () => { 
-            if (chartRef.current) {
-                chartRef.current.exporting.export("png");
-            }
-        });
+        // Export as PNG
+        createButton(
+            `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
+             <rect x="4" y="17" width="16" height="4" rx="1" ry="1" />`, 
+            () => { if (chartRef.current) chartRef.current.exporting.export("png"); }, 
+            "Export as PNG"
+        );
     
-        createButton(`<path d="M3 3V21H21V3H3ZM19 19H5V5H19V19ZM7 17H9V15H7V17ZM11 17H13V15H11V17ZM15 17H17V15H15V17ZM7 13H9V11H7V13ZM11 13H13V11H11V13ZM15 13H17V11H15V13ZM7 9H9V7H7V9ZM11 9H13V7H11V9ZM15 9H17V7H15V9Z" />`, () => { 
-            if (chartRef.current) {
-                chartRef.current.exporting.export("xlsx");
-            }
-        });
+        // Export as XLSX
+        createButton(
+            `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+             <path d="M14 3v5h5M9 17l-3-3m0 0 3-3m-3 3h6" />`, 
+            () => { if (chartRef.current) chartRef.current.exporting.export("xlsx"); }, 
+            "Export as XLSX"
+        );
     
-        createButton(`<path d="M5 5H19V19H5V5ZM7 17H17V7H7V17ZM11 15V13H9V11H11V9H13V11H15V13H13V15H11Z" />`, () => {
-            const chartElement = document.getElementById("chartdiv");
-            if (!document.fullscreenElement) {
-                chartElement.requestFullscreen().catch(err => {
-                    console.error("Error attempting to enable fullscreen mode:", err.message);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        });
+        // Fullscreen Mode
+        createButton(
+            `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`, 
+            () => {
+                const chartElement = document.getElementById("chartdiv");
+                if (!document.fullscreenElement) {
+                    chartElement.requestFullscreen().catch(err => {
+                        console.error("Error attempting to enable fullscreen mode:", err.message);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }, 
+            "Toggle Fullscreen"
+        );
     };
     
-
     return (
         <div id="main-section" className="w-[97%] h-[40vh] pt-[10px] mt-[10px] ml-2 bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
             <h2 className='text-left m-3'><b>PRODUCTION INTENSITY</b></h2>
-            {loading && <div className="flex flex-col justify-center items-center h-[35vh] w-full"><div className="loader"></div></div>}
+            {loading && <div className="flex flex-col justify-center items-center h-[30vh] w-full"><div className="loader"></div></div>}
             <div id="exportoption4" className={`${loading ? "hidden" : ""}`} style={{ textAlign: "right", marginBottom: "-10px", marginRight: "10px", marginTop: "-20px", zIndex: 999 }}></div>
             <div id="chartdiv" className={`w-full h-[30vh] ${loading ? "hidden" : ""}`}></div>
         </div>

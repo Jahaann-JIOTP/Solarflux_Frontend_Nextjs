@@ -6,8 +6,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
 import ProductionLayeredColumn from "@/components/heat_map";
-
-const API_BASE_URL = "http://15.206.128.214:5000";
+import WaterfallChart from "@/components/water_fall";
+import EfficiencyChart from "@/components/efficiency_solar_power";
+import ProductionLayeredColumn1 from "@/components/solar_generation_cost";
+import config from "@/config"; 
 
 export default function PlantAnalysis() {
     // 🔹 State for dropdown values
@@ -15,18 +17,22 @@ export default function PlantAnalysis() {
     const [inverters, setInverters] = useState([]);
     const [mppts, setMppts] = useState([]);
     const [strings, setStrings] = useState([]);
+    const baseUrl = config.BASE_URL;
 
     // 🔹 Selected values
     const [selectedPlant, setSelectedPlant] = useState("Coca Cola Faisalabad");
     const [selectedInverter, setSelectedInverter] = useState("");
     const [selectedMppt, setSelectedMppt] = useState("");
     const [selectedString, setSelectedString] = useState("");
-    const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+    const [dateRange, setDateRange] = useState([
+        new Date(new Date().setDate(new Date().getDate() - 30)), // 30 days ago
+        new Date(new Date().setDate(new Date().getDate() - 25))  // 25 days ago
+    ]);
 
     // 🔹 Fetch inverters based on selected plant
     useEffect(() => {
         if (!selectedPlant) return;
-        axios.post(`${API_BASE_URL}/production/get-devices`, { station: selectedPlant })
+        axios.post(`${baseUrl}production/get-devices`, { station: selectedPlant })
             .then(response => setInverters(response.data))
             .catch(error => console.error("Error fetching inverters:", error));
     }, [selectedPlant]);
@@ -34,7 +40,7 @@ export default function PlantAnalysis() {
     // 🔹 Fetch MPPT based on selected inverter
     useEffect(() => {
         if (!selectedInverter) return;
-        axios.post(`${API_BASE_URL}/production/get-mppt`, { devId: selectedInverter })
+        axios.post(`${baseUrl}production/get-mppt`, { devId: selectedInverter })
             .then(response => setMppts(response.data))
             .catch(error => console.error("Error fetching MPPT:", error));
     }, [selectedInverter]);
@@ -42,7 +48,7 @@ export default function PlantAnalysis() {
     // 🔹 Fetch Strings based on selected inverter and MPPT
     useEffect(() => {
         if (!selectedInverter || !selectedMppt) return;
-        axios.post(`${API_BASE_URL}/solaranalytics/get-strings`, {
+        axios.post(`${baseUrl}solaranalytics/get-strings`, {
             Plant: selectedPlant,
             devId: selectedInverter,
             mppt: selectedMppt,
@@ -81,7 +87,7 @@ export default function PlantAnalysis() {
                 <div className="flex items-center space-x-2">
                     <label>Plant:</label>
                     <select
-                        className="px-2 py-1 rounded-md bg-[#0D2D42] w-[190px]"
+                        className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
                         value={selectedPlant}
                         onChange={(e) => setSelectedPlant(e.target.value)}
                     >
@@ -95,7 +101,7 @@ export default function PlantAnalysis() {
                 <div className="flex items-center space-x-2">
                     <label>Inverter:</label>
                     <select
-                        className="px-2 py-1 rounded-md bg-[#0D2D42] w-[190px]"
+                        className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
                         value={selectedInverter}
                         onChange={(e) => setSelectedInverter(e.target.value)}
                     >
@@ -110,7 +116,7 @@ export default function PlantAnalysis() {
                 <div className="flex items-center space-x-2">
                     <label>MPPT:</label>
                     <select
-                        className="px-2 py-1 rounded-md bg-[#0D2D42] w-[190px]"
+                        className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
                         value={selectedMppt}
                         onChange={(e) => setSelectedMppt(e.target.value)}
                     >
@@ -124,8 +130,9 @@ export default function PlantAnalysis() {
                 {/* String Dropdown */}
                 <div className="flex items-center space-x-2">
                     <label>String:</label>
+                    <div className="text-[14px] relative inline-flex min-w-[180px]">
                     <select
-                        className="px-2 py-1 rounded-md bg-[#0D2D42] w-[190px]"
+                        className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
                         value={selectedString}
                         onChange={(e) => setSelectedString(e.target.value)}
                     >
@@ -134,25 +141,30 @@ export default function PlantAnalysis() {
                             <option key={str.value} value={str.value}>{str.label}</option>
                         ))}
                     </select>
+                    </div>
                 </div>
 
                 {/* Date Range Picker */}
+                
                 <div className="flex items-center space-x-2">
-                    <label>Interval:</label>
-                    <DatePicker
-                        selected={dateRange[0]}
-                        onChange={(dates) => setDateRange(dates)}
-                        startDate={dateRange[0]}
-                        endDate={dateRange[1]}
-                        selectsRange
-                        className="px-2 py-1 rounded-md bg-[#0D2D42] w-[190px]"
-                    />
-                    <FaCalendarAlt className="text-blue-500" />
-                </div>
+                          <label className="text-white">Interval:</label>
+                          <div className="text-[14px] relative inline-flex min-w-[180px]">
+                            <DatePicker
+                              selected={dateRange[0]}
+                              onChange={(dates) => dates && setDateRange(dates)}
+                              startDate={dateRange[0]}
+                              endDate={dateRange[1]}
+                              selectsRange
+                            //   dateFormat="MMMM d, yyyy"
+                              className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[200px] text-white pr-8"
+                            />
+                            <FaCalendarAlt className="absolute top-2 right-2 text-blue-500 pointer-events-none" />
+                          </div>
+                        </div>
 
                 {/* Generate Chart Button */}
                 <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                    className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 cursor-pointer"
                     onClick={handleGenerateChart}
                 >
                     Generate
@@ -160,7 +172,7 @@ export default function PlantAnalysis() {
             </div>
 
             {/* 🔹 Chart Section */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mt-2">
                 <ProductionLayeredColumn
                     selectedOptionplant1={chartParams.plant}
                     selectedOptioninverter1={chartParams.inverter}
@@ -169,7 +181,7 @@ export default function PlantAnalysis() {
                     customFromDate={chartParams.start_date}
                     customToDate={chartParams.end_date}
                 />
-                <ProductionLayeredColumn
+                <WaterfallChart
                     selectedOptionplant1={chartParams.plant}
                     selectedOptioninverter1={chartParams.inverter}
                     selectedOptionmppt1={chartParams.mppt}
@@ -177,7 +189,7 @@ export default function PlantAnalysis() {
                     customFromDate={chartParams.start_date}
                     customToDate={chartParams.end_date}
                 />
-                <ProductionLayeredColumn
+                <EfficiencyChart
                     selectedOptionplant1={chartParams.plant}
                     selectedOptioninverter1={chartParams.inverter}
                     selectedOptionmppt1={chartParams.mppt}
@@ -185,7 +197,7 @@ export default function PlantAnalysis() {
                     customFromDate={chartParams.start_date}
                     customToDate={chartParams.end_date}
                 />
-                <ProductionLayeredColumn
+                <ProductionLayeredColumn1
                     selectedOptionplant1={chartParams.plant}
                     selectedOptioninverter1={chartParams.inverter}
                     selectedOptionmppt1={chartParams.mppt}

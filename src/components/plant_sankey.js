@@ -87,8 +87,70 @@ export default function PlantSankeyChart() {
 
     window.chart = chart;
     fetchSankeyData();
+    addControls();
   };
+  const addControls = () => {
+    const controlsWrapper = document.getElementById("exportoptionsankeyplant");
+    controlsWrapper.innerHTML = "";
 
+    const createButton = (svgPath, callback, tooltip) => {
+        const button = document.createElement("button");
+        button.style.backgroundColor = "transparent";
+        button.style.border = "none";
+        button.style.padding = "5px";
+        button.style.cursor = "pointer";
+        button.style.display = "inline-flex";
+        button.style.justifyContent = "center";
+        button.style.alignItems = "center";
+        button.style.width = "30px";
+        button.style.height = "30px";
+        button.style.margin = "2px";
+        button.title = tooltip; // Add tooltip
+
+        button.innerHTML = `
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" 
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                xmlns="http://www.w3.org/2000/svg">
+                ${svgPath}
+            </svg>
+        `;
+
+        button.addEventListener("click", callback);
+        controlsWrapper.appendChild(button);
+    };
+
+    // Export as PNG
+    createButton(
+        `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
+         <rect x="4" y="17" width="16" height="4" rx="1" ry="1" />`,
+        () => { if (chartRef.current) chartRef.current.exporting.export("png"); },
+        "Export as PNG"
+    );
+
+    // Export as XLSX
+    createButton(
+        `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+         <path d="M14 3v5h5M9 17l-3-3m0 0 3-3m-3 3h6" />`,
+        () => { if (chartRef.current) chartRef.current.exporting.export("xlsx"); },
+        "Export as XLSX"
+    );
+
+    // Fullscreen Mode
+    createButton(
+        `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
+        () => {
+            const chartElement = document.getElementById("chartdiv");
+            if (!document.fullscreenElement) {
+                chartElement.requestFullscreen().catch(err => {
+                    console.error("Error attempting to enable fullscreen mode:", err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        },
+        "Toggle Fullscreen"
+    );
+};
   return (
     <div className="p-2">
       {/* Controls */}
@@ -97,7 +159,7 @@ export default function PlantSankeyChart() {
         <div className="flex items-center space-x-2">
           <label className="text-white">Plant:</label>
           <select
-            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[250px] text-[14px]"
+            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
             value={selectedPlant}
             onChange={(e) => setSelectedPlant(e.target.value)}
           >
@@ -115,8 +177,7 @@ export default function PlantSankeyChart() {
               startDate={dateRange[0]}
               endDate={dateRange[1]}
               selectsRange
-              dateFormat="MMMM d, yyyy"
-              className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[270px] text-white pr-8"
+              className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[200px] text-white pr-8"
             />
             <FaCalendarAlt className="absolute top-2 right-2 text-blue-500 pointer-events-none" />
           </div>
@@ -124,24 +185,26 @@ export default function PlantSankeyChart() {
 
         {/* Generate Button */}
         <button
-          className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
+          className={`px-4 py-1 rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 cursor-pointer text-white hover:bg-blue-600 transition"
+          } text-white transition`}
           onClick={fetchSankeyData}
         >
-          Generate
+          {loading ? "Loading..." : "Generate"}
         </button>
       </div>
 
       {/* Chart Container */}
       <div
         id="main-section"
-        className="w-full h-[75vh] pt-[10px] mt-[20px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
+        className="w-full h-[77vh] pt-[10px] mt-[25px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
       >
         {loading && (
           <div className="flex justify-center items-center h-full w-full">
             <div className="loader"></div>
           </div>
         )}
-        <div id="chartdiv" className={`w-full h-[50vh] mt-[80px] ${loading ? "hidden" : ""}`}></div>
+        <div id="exportoptionsankeyplant" className={`${loading ? "hidden" : ""}`} style={{ textAlign: "right", marginBottom: "-10px", marginRight: "10px", marginTop: "20px", zIndex: 999 }}></div>
+        <div id="chartdiv" className={`w-full h-[50vh] mt-[60px] ${loading ? "hidden" : ""}`}></div>
       </div>
     </div>
   );
