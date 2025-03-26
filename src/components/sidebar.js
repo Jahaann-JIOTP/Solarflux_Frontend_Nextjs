@@ -1,9 +1,8 @@
 "use client";
-
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-
+import config from "@/config";
 import {
   FaChevronLeft,
   FaTachometerAlt,
@@ -16,31 +15,32 @@ import {
   FaBolt,
   FaUserAlt,
   FaAngleDown,
+  FaSignOutAlt,
 } from "react-icons/fa";
-import { FaSignOutAlt } from "react-icons/fa"; // ✅ Import Logout Icon
-import { useRouter } from "next/navigation"; // ✅ Import Router for Redirect
+import { useRouter } from "next/navigation";
 import axios from "axios";
-import Swal from "sweetalert2"; // ✅ Import SweetAlert for notifications
+import Swal from "sweetalert2";
 
-const API_BASE_URL = "http://15.206.128.214:5000"; // ✅ Backend URL
+const baseUrl = config.BASE_URL;
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isProductionOpen, setIsProductionOpen] = useState(false);
+  const [isHealthOpen, setIsHealthOpen] = useState(false);
   const pathname = usePathname();
-
   const [allowedPrivileges, setAllowedPrivileges] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     setIsProductionOpen(false);
-    setIsExpanded(false); // Collapse sidebar on page change
+    setIsHealthOpen(false);
+    setIsExpanded(false);
 
-    // Fetch user data from localStorage
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.role && parsedUser.role.privileges) {
+        if (parsedUser.role?.privileges) {
           setAllowedPrivileges(parsedUser.role.privileges.map((p) => p.name));
         }
       } catch (error) {
@@ -49,21 +49,16 @@ export default function Sidebar() {
     }
   }, [pathname]);
 
-  // Close submenu and collapse sidebar when page changes
-  useEffect(() => {
-    setIsProductionOpen(false);
-    setIsExpanded(false); // Collapse sidebar on page change
-  }, [pathname]);
-
-  // Check if any submenu is active
   const isProductionActive =
     pathname.startsWith("/NationWide") ||
     pathname.startsWith("/PlantLevel") ||
     pathname.startsWith("/InvertorLevel");
-  const router = useRouter(); // ✅ Initialize Router
+
+  const isHealthActive =
+    pathname.startsWith("/Health") || pathname.startsWith("/SystemAlerter") || pathname.startsWith("/StringClustering");
+
   const handleLogout = async () => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       Swal.fire({
         icon: "error",
@@ -77,14 +72,11 @@ export default function Sidebar() {
 
     try {
       await axios.post(
-        `${API_BASE_URL}/auth/logout`,
+        `${baseUrl}auth/logout`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // ✅ Clear Token and Redirect Immediately
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
@@ -99,7 +91,7 @@ export default function Sidebar() {
       });
 
       setTimeout(() => {
-        router.push("/login"); // 🚀 Redirect to Login Page Immediately
+        router.push("/login");
       }, 1500);
     } catch (error) {
       Swal.fire({
@@ -118,13 +110,10 @@ export default function Sidebar() {
         isExpanded ? "w-60" : "w-[90px]"
       } bg-[#0D2D42] rounded-2xl p-5 flex flex-col items-center transition-all duration-300 ease-in-out z-[9999] shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]`}
     >
-      {/* Toggle Button */}
-     
-
-      {/* Logo */}
       <img src="/shams.png" alt="Logo" className="max-w-none" />
 
       <div className="border-t border-gray-500 w-full my-2"></div>
+
       <button
         className="text-white bg-[#0D2D42] rounded-xl p-2 "
         onClick={() => setIsExpanded(!isExpanded)}
@@ -135,9 +124,10 @@ export default function Sidebar() {
           }`}
         />
       </button>
+
       <div className="border-t border-gray-500 w-full my-2"></div>
-      {/* Sidebar Menu */}
-      <nav className={`flex justify-center ${isExpanded ? "" : "items-center"}  flex-col w-full space-y-1 relative"`}>
+
+      <nav className={`flex justify-center ${isExpanded ? "" : "items-center"} flex-col w-full space-y-1 relative`}>
         {allowedPrivileges.includes("Dashboard") && (
           <SidebarItem
             icon={FaTachometerAlt}
@@ -148,7 +138,6 @@ export default function Sidebar() {
           />
         )}
 
-        {/* Production - Parent Item */}
         {allowedPrivileges.includes("Production") && (
           <div className="relative">
             <div
@@ -163,11 +152,7 @@ export default function Sidebar() {
                 }`}
               />
               {isExpanded && (
-                <span
-                  className={`text-[12px] ${
-                    isProductionActive ? "text-[#bf4a63]" : "text-white"
-                  }`}
-                >
+                <span className={`text-[12px] ${isProductionActive ? "text-[#bf4a63]" : "text-white"}`}>
                   Production
                 </span>
               )}
@@ -180,7 +165,6 @@ export default function Sidebar() {
               )}
             </div>
 
-            {/* Submenu */}
             <div
               className={`${
                 isExpanded
@@ -213,6 +197,56 @@ export default function Sidebar() {
           </div>
         )}
 
+        {allowedPrivileges.includes("Health") && (
+          <div className="relative">
+            <div
+              className={`flex items-center space-x-3 px-2 text-white p-2 rounded-md transition w-full cursor-pointer ${
+                isHealthActive ? "text-[#bf4a63]" : ""
+              }`}
+              onClick={() => setIsHealthOpen(!isHealthOpen)}
+            >
+              <FaHeartbeat
+                className={`text-lg ${isHealthActive ? "text-[#bf4a63]" : "text-white"}`}
+              />
+              {isExpanded && (
+                <span className={`text-[12px] ${isHealthActive ? "text-[#bf4a63]" : "text-white"}`}>
+                  Health
+                </span>
+              )}
+              {isExpanded && (
+                <FaAngleDown
+                  className={`ml-auto transition-transform ${
+                    isHealthOpen ? "rotate-180" : ""
+                  }`}
+                />
+              )}
+            </div>
+
+            <div
+              className={`${
+                isExpanded
+                  ? "ml-4"
+                  : "absolute left-[80px] !pl-0 top-0 bg-[#04192b] p-2 border-l-3 border-[#bf4a63] rounded-lg w-[200px] shadow-lg"
+              } ${isHealthOpen ? "block" : "hidden"}`}
+            >
+              <SidebarItem
+                text="– &nbsp;System Alerter"
+                href="/SystemAlerter"
+                isExpanded={true}
+                active={pathname === "/SystemAlerter"}
+                isSubmenu={true}
+              />
+              <SidebarItem
+                text="– &nbsp;String Clustering"
+                href="/StringClustering"
+                isExpanded={true}
+                active={pathname === "/StringClustering"}
+                isSubmenu={true}
+              />
+            </div>
+          </div>
+        )}
+
         {allowedPrivileges.includes("SLD") && (
           <SidebarItem
             icon={FaProjectDiagram}
@@ -229,15 +263,6 @@ export default function Sidebar() {
             href="/SuppressionView"
             isExpanded={isExpanded}
             active={pathname === "/SuppressionView"}
-          />
-        )}
-        {allowedPrivileges.includes("Health") && (
-          <SidebarItem
-            icon={FaHeartbeat}
-            text="Health"
-            href="/Health"
-            isExpanded={isExpanded}
-            active={pathname === "/Health"}
           />
         )}
         {allowedPrivileges.includes("Analysis") && (
@@ -277,20 +302,17 @@ export default function Sidebar() {
           />
         )}
 
-        {/* Logout Button */}
         <button
-  onClick={handleLogout}
-  className="flex justify-center items-center gap-3 text-white px-3 py-3 rounded-md transition w-full cursor-pointer bg-[#bf4a63]"
->
-  <FaSignOutAlt className="text-lg" />
-  {isExpanded && <span className="text-[12px]">Logout</span>}
-</button>
-
+          onClick={handleLogout}
+          className="flex justify-center items-center gap-3 text-white px-3 py-3 rounded-md transition w-full cursor-pointer bg-[#bf4a63]"
+        >
+          <FaSignOutAlt className="text-lg" />
+          {isExpanded && <span className="text-[12px]">Logout</span>}
+        </button>
       </nav>
 
       <div className="flex-grow"></div>
 
-      {/* Footer Logo */}
       <img
         src="/company.png"
         alt="Footer Logo"
@@ -300,7 +322,7 @@ export default function Sidebar() {
   );
 }
 
-/* ✅ Sidebar Item Component with Active State */
+// Sidebar Item Component
 const SidebarItem = ({
   icon: Icon,
   text,
@@ -313,22 +335,14 @@ const SidebarItem = ({
     <Link href={href} passHref>
       <div
         className={`flex items-center gap-3 text-white !p-[10px] rounded-md transition w-full cursor-pointer 
-          ${isSubmenu ? "text-[12px] pl-5 py-1" : "px-3 py-3"} 
-          ${active ? "text-[#bf4a63]" : "text-white"}`}
+        ${isSubmenu ? "text-[12px] pl-5 py-1" : "px-3 py-3"} 
+        ${active ? "text-[#bf4a63]" : "text-white"}`}
       >
         {Icon && (
-          <Icon
-            className={`text-lg shrink-0 ${
-              active ? "text-[#bf4a63]" : "text-white"
-            }`}
-          />
+          <Icon className={`text-lg shrink-0 ${active ? "text-[#bf4a63]" : "text-white"}`} />
         )}
         {isExpanded && (
-          <span
-            className={`text-[12px] ${
-              active ? "text-[#bf4a63]" : "text-white"
-            } leading-none`}
-          >
+          <span className={`text-[12px] ${active ? "text-[#bf4a63]" : "text-white"} leading-none`}>
             {text}
           </span>
         )}

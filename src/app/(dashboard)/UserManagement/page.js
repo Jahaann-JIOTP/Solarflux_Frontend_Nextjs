@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-
+import config from "@/config";
 export default function UserManagement() {
   const [activeTab, setActiveTab] = useState("addUser");
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const baseUrl = config.BASE_URL;
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
@@ -15,8 +16,13 @@ export default function UserManagement() {
     role: "",
     privileges: [],
   });
-
-  const API_BASE_URL = "http://15.206.128.214:5000";
+  const [editUserPopup, setEditUserPopup] = useState(false);
+  const [editUserData, setEditUserData] = useState({
+    _id: "",
+    name: "",
+    email: "",
+    role: "",
+  });
   const [token, setToken] = useState(null);
   const [showRolePopup, setShowRolePopup] = useState(false);
   const [newRole, setNewRole] = useState("");
@@ -53,19 +59,28 @@ export default function UserManagement() {
     "Power Analytics",
     "User Management",
   ];
+  const openEditUserPopup = (user) => {
+    setEditUserData({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role?._id || "", // ensure role is ID
+    });
+    setEditUserPopup(true);
+  };
 
   // ✅ Fetch Users
   const fetchUsers = async () => {
     if (!token) return; // ✅ Ensure token is available
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/users/all`, {
+      const response = await axios.get(`${baseUrl}users/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
-      Swal.fire("Error", "Failed to fetch users!", "error");
+      Swal.fire("Error", error.response?.data?.message || "Failed to fetch users!", "error");
     } finally {
       setLoading(false);
     }
@@ -74,13 +89,13 @@ export default function UserManagement() {
   const fetchRoles = async () => {
     if (!token) return; // ✅ Prevent API call if token is not yet set
     try {
-      const response = await axios.get(`${API_BASE_URL}/roles/all`, {
+      const response = await axios.get(`${baseUrl}roles/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRoles(response.data);
     } catch (error) {
       console.error("Error fetching roles:", error);
-      Swal.fire("Error", "Failed to fetch roles!", "error");
+      Swal.fire("Error", error.response?.data?.message || "Failed to fetch roles!", "error");
     }
   };
 
@@ -101,7 +116,7 @@ export default function UserManagement() {
 
     try {
       await axios.post(
-        `${API_BASE_URL}/users/register`,
+        `${baseUrl}users/register`,
         { ...newUser },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -118,10 +133,13 @@ export default function UserManagement() {
       });
     } catch (error) {
       console.error("Error adding user:", error);
-      Swal.fire(
-        "Note",
-        "Password must be longer than or equal to 6 characters",
-      );
+
+      // Extract message (handle if it's an array)
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response.data.message.join("\n") // Join array messages with a newline
+        : error.response?.data?.message || "Something went wrong";
+
+      Swal.fire("Error", errorMessage, "error");
     }
   };
 
@@ -138,23 +156,18 @@ export default function UserManagement() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`${API_BASE_URL}/users/delete/${id}`, {
+          await axios.delete(`${baseUrl}users/delete/${id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
 
-          Swal.fire(
-            "Deleted!",
-            "User has been removed successfully.",
-            "success"
-          );
-
+          Swal.fire("Deleted!", "User has been removed successfully.", "success");
           // Refresh the users list
           fetchUsers();
         } catch (error) {
+          Swal.fire("Error", error.response?.data?.message || "Failed to delete user!", "error");
           console.error("Error deleting user:", error);
-          Swal.fire("Error", "Failed to delete user!", "error");
         }
       }
     });
@@ -172,13 +185,13 @@ export default function UserManagement() {
   const fetchPrivileges = async () => {
     if (!token) return; // Ensure token is available
     try {
-      const response = await axios.get(`${API_BASE_URL}/privileges/all`, {
+      const response = await axios.get(`${baseUrl}privileges/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPrivileges(response.data);
     } catch (error) {
       console.error("Error fetching privileges:", error);
-      Swal.fire("Error", "Failed to fetch privileges!", "error");
+      Swal.fire("Error", error.response?.data?.message || "Failed to fetch privileges!", "error");
     }
   };
 
@@ -204,7 +217,7 @@ export default function UserManagement() {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/roles/add`,
+        `${baseUrl}roles/add`,
         { name: newRole, privileges: selectedPrivileges },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -223,7 +236,7 @@ export default function UserManagement() {
         // ✅ Show success popup
         Swal.fire({
           title: "Success",
-          text: "Your role has been added successfully!",
+          text: response.data.message || "Your role has been added successfully!",
           icon: "success",
           confirmButtonColor: "#3085d6",
           confirmButtonText: "OK",
@@ -233,7 +246,7 @@ export default function UserManagement() {
       }
     } catch (error) {
       console.error("Error adding role:", error);
-      Swal.fire("Error", "Failed to add role!", "error");
+      Swal.fire("Error", error.response?.data?.message || "Failed to add role!", "error");
     }
   };
 
@@ -245,7 +258,7 @@ export default function UserManagement() {
 
     try {
       await axios.patch(
-        `${API_BASE_URL}/roles/update/${editRole._id}`,
+        `${baseUrl}roles/update/${editRole._id}`,
         { name: editRole.name, privileges: editPrivileges },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -255,7 +268,7 @@ export default function UserManagement() {
       fetchRoles(); // Refresh roles list
     } catch (error) {
       console.error("Error updating role:", error);
-      Swal.fire("Error", "Failed to update role!", "error");
+      Swal.fire("Error", error.response?.data?.message || "Failed to update role!", "error");
     }
   };
 
@@ -271,19 +284,14 @@ export default function UserManagement() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`${API_BASE_URL}/roles/delete/${roleId}`, {
+          await axios.delete(`${baseUrl}roles/delete/${roleId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-
-          Swal.fire(
-            "Deleted!",
-            "Role has been removed successfully.",
-            "success"
-          );
+          Swal.fire("Deleted!", "Role has been removed successfully.", "success");
           fetchRoles(); // Refresh roles list
         } catch (error) {
           console.error("Error deleting role:", error);
-          Swal.fire("Error", "Failed to delete role!", "error");
+          Swal.fire("Error", error.response?.data?.message || "Failed to delete role!", "error");
         }
       }
     });
@@ -294,31 +302,28 @@ export default function UserManagement() {
       {/* Tabs */}
       <div className="flex space-x-4 border-b border-gray-700 mb-6">
         <button
-          className={`px-6 py-2 ${
-            activeTab === "roles"
+          className={`px-6 py-2 cursor-pointer ${activeTab === "roles"
               ? "border-b-4 border-blue-500 text-white"
               : "text-gray-400"
-          }`}
+            }`}
           onClick={() => setActiveTab("roles")}
         >
           Roles
         </button>
         <button
-          className={`px-6 py-2 ${
-            activeTab === "addUser"
+          className={`px-6 py-2 cursor-pointer ${activeTab === "addUser"
               ? "border-b-4 border-blue-500 text-white"
               : "text-gray-400"
-          }`}
+            }`}
           onClick={() => setActiveTab("addUser")}
         >
           Add User
         </button>
         <button
-          className={`px-6 py-2 ${
-            activeTab === "viewUsers"
+          className={`px-6 py-2 cursor-pointer ${activeTab === "viewUsers"
               ? "border-b-4 border-blue-500 text-white"
               : "text-gray-400"
-          }`}
+            }`}
           onClick={() => setActiveTab("viewUsers")}
         >
           View Users
@@ -353,7 +358,7 @@ export default function UserManagement() {
                 }
                 setShowRolePopup(true);
               }}
-              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 cursor-pointer"
             >
               + Add Role
             </button>
@@ -416,29 +421,31 @@ export default function UserManagement() {
           <table className="w-full text-white border border-gray-600">
             <thead>
               <tr className="bg-gray-800">
+                <th className="p-2 border">Sr No</th>
                 <th className="p-2 border">Role Name</th>
                 <th className="p-2 border">Privileges</th>
                 <th className="p-2 border">Actions</th>
-                {/* ✅ New Column for Delete Button */}
               </tr>
             </thead>
+
             <tbody>
-              {roles.map((role) => (
+              {roles.map((role, i) => (
                 <tr key={role._id} className="hover:bg-gray-700">
+                  <td className="p-2 border text-center">{i + 1}</td>
                   <td className="p-2 border text-center">{role.name}</td>
                   <td className="p-2 border text-center">
                     {role.privileges.map((p) => p.name).join(", ")}
                   </td>
                   <td className="p-2 border text-center">
                     <button
-                      className="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-600"
+                      className="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-600 cursor-pointer"
                       onClick={() => openEditRolePopup(role)}
                     >
                       Edit
                     </button>
-                    &#160;<span>|</span>&#160;
+                    &#160;<span></span>&#160;
                     <button
-                      className="bg-red-500 px-3 py-1 rounded-md hover:bg-red-600"
+                      className="bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 cursor-pointer"
                       onClick={() => handleDeleteRole(role._id)}
                     >
                       Delete
@@ -519,7 +526,7 @@ export default function UserManagement() {
           <table className="w-full text-white border border-gray-600">
             <thead>
               <tr className="bg-gray-800">
-                {/* <th className="p-2 border">ID</th> */}
+                <th className="p-2 border">Sr No</th>
                 <th className="p-2 border">Name</th>
                 <th className="p-2 border">Email</th>
                 <th className="p-2 border">Role</th>
@@ -527,18 +534,22 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr
-                  key={user._id || user.id}
-                  className="hover:bg-gray-700 text-center"
-                >
-                  {/* <td className="p-2 border">{user._id || user.id}</td> */}
+              {users.map((user, i) => (
+                <tr key={user._id || user.id} className="hover:bg-gray-700 text-center">
+                  <td className="p-2 border">{i + 1}</td>
                   <td className="p-2 border">{user.name}</td>
                   <td className="p-2 border">{user.email}</td>
                   <td className="p-2 border">{user.role?.name || "N/A"}</td>
                   <td className="p-2 border">
                     <button
-                      className="bg-red-500 px-3 py-1 rounded-md hover:bg-red-700"
+                      className="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-600 mr-2 cursor-pointer"
+                      onClick={() => openEditUserPopup(user)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="bg-red-500 px-3 py-1 rounded-md hover:bg-red-700 cursor-pointer"
                       onClick={() => handleDeleteUser(user._id || user.id)}
                     >
                       Delete
@@ -550,6 +561,84 @@ export default function UserManagement() {
           </table>
         </div>
       )}
+      {editUserPopup && (
+        <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
+          <div className="bg-gray-900 p-6 rounded-md shadow-lg w-[400px]">
+            <h2 className="text-white text-lg font-semibold mb-3">Edit User</h2>
+
+            <div className="grid gap-4 mb-4">
+              <input
+                type="text"
+                placeholder="Name"
+                value={editUserData.name}
+                onChange={(e) =>
+                  setEditUserData({ ...editUserData, name: e.target.value })
+                }
+                className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-600 w-full"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={editUserData.email}
+                onChange={(e) =>
+                  setEditUserData({ ...editUserData, email: e.target.value })
+                }
+                className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-600 w-full"
+              />
+              <select
+                value={editUserData.role}
+                onChange={(e) =>
+                  setEditUserData({ ...editUserData, role: e.target.value })
+                }
+                className="px-4 py-2 rounded-md bg-gray-800 text-white border border-gray-600 w-full"
+              >
+                <option value="">Select Role</option>
+                {roles.map((role) => (
+                  <option key={role._id} value={role._id}>
+                    {role.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-between">
+              <button
+                onClick={async () => {
+                  try {
+                    await axios.patch(
+                      `${baseUrl}users/update/${editUserData._id}`,
+                      {
+                        name: editUserData.name,
+                        email: editUserData.email,
+                        role: editUserData.role,
+                      },
+                      {
+                        headers: { Authorization: `Bearer ${token}` },
+                      }
+                    );
+                    Swal.fire("Success", "User updated successfully!", "success");
+                    setEditUserPopup(false);
+                    fetchUsers(); // refresh the list
+                  } catch (error) {
+                    console.error("Error updating user:", error);
+                    Swal.fire("Error", error.response?.data?.message || "Failed to update user!", "error");
+                  }
+                }}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 cursor-pointer"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={() => setEditUserPopup(false)}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {editRolePopup && (
         <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center">
           <div className="bg-gray-900 p-6 rounded-md shadow-lg w-[400px]">
@@ -584,13 +673,13 @@ export default function UserManagement() {
             <div className="flex justify-between mt-4">
               <button
                 onClick={handleUpdateRole} // ✅ Submit updated role privileges
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 cursor-pointer"
               >
                 Save Changes
               </button>
               <button
                 onClick={() => setEditRolePopup(false)}
-                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 cursor-pointer"
               >
                 Cancel
               </button>

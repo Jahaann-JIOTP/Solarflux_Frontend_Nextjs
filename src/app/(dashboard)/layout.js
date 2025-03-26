@@ -26,6 +26,8 @@ export default function DashboardLayout({ children }) {
     if (pathname.includes("InvertorLevel")) return "INVERTER LEVEL";
     if (pathname.includes("SolarAnalytics")) return "SOLAR ANALYTICS";
     if (pathname.includes("TrendAnalysis")) return "TREND ANALYSIS";
+    if (pathname.includes("SystemAlerter")) return "SYSTEM ALERTER";
+    if (pathname.includes("StringClustering")) return "STRING CLUSTERING";
     if (pathname.includes("Settings")) return "SETTINGS";
     if (pathname.includes("Reports")) return "REPORTS";
     if (pathname.includes("SingleLineDiagram")) return "SINGLE LINE DIAGRAM";

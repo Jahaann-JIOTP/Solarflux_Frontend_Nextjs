@@ -105,7 +105,7 @@ const SingleLineDiagramDetails = () => {
         <div className="flex items-center space-x-2">
           <label className="text-white">Plant:</label>
           <select
-            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[250px] text-[14px]"
+            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
             value={formValues.plant}
             onChange={(e) =>
               setFormValues({ ...formValues, plant: e.target.value })
@@ -119,7 +119,7 @@ const SingleLineDiagramDetails = () => {
         <div className="flex items-center space-x-2">
           <label className="text-white">Parameter:</label>
           <select
-            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[250px] text-[14px]"
+            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
             value={formValues.parameter}
             onChange={(e) =>
               setFormValues({ ...formValues, parameter: e.target.value })
@@ -138,8 +138,7 @@ const SingleLineDiagramDetails = () => {
             <DatePicker
               selected={formValues.date}
               onChange={(date) => setFormValues({ ...formValues, date })}
-              dateFormat="MMMM d, yyyy"
-              className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[250px] text-white pr-8"
+              className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[200px] text-white pr-8"
             />
             <FaCalendarAlt className="absolute top-2 right-2 text-blue-500 pointer-events-none" />
           </div>
