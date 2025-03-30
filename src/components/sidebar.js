@@ -50,14 +50,11 @@ export default function Sidebar() {
   }, [pathname]);
 
   const isProductionActive =
-    pathname.startsWith("/NationWide") ||
-    pathname.startsWith("/PlantLevel") ||
-    pathname.startsWith("/InvertorLevel");
+    pathname.startsWith("/NationWide") || pathname.startsWith("/PlantLevel") || pathname.startsWith("/InvertorLevel");
 
   const isHealthActive =
-    pathname.startsWith("/Health") || pathname.startsWith("/SystemAlerter") || pathname.startsWith("/StringClustering");
-
-  const handleLogout = async () => {
+    pathname.startsWith("/Health") || pathname.startsWith("/EfficiencyandTemperature") || pathname.startsWith("/SystemComparator") || pathname.startsWith("/SystemAlerter") || pathname.startsWith("/StringClustering");
+    const handleLogout = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       Swal.fire({
@@ -106,9 +103,8 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed top-4 left-3 h-[95vh] ${
-        isExpanded ? "w-60" : "w-[90px]"
-      } bg-[#0D2D42] rounded-2xl p-5 flex flex-col items-center transition-all duration-300 ease-in-out z-[9999] shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]`}
+      className={`fixed top-4 left-3 h-[95vh] ${isExpanded ? "w-60" : "w-[90px]"
+        } bg-[#0D2D42] rounded-2xl p-5 flex flex-col items-center transition-all duration-300 ease-in-out z-[9999] shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]`}
     >
       <img src="/shams.png" alt="Logo" className="max-w-none" />
 
@@ -119,9 +115,8 @@ export default function Sidebar() {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <FaChevronLeft
-          className={`text-lg transition-transform duration-300 ${
-            isExpanded ? "" : "rotate-180"
-          }`}
+          className={`text-lg transition-transform duration-300 ${isExpanded ? "" : "rotate-180"
+            }`}
         />
       </button>
 
@@ -141,15 +136,13 @@ export default function Sidebar() {
         {allowedPrivileges.includes("Production") && (
           <div className="relative">
             <div
-              className={`flex items-center space-x-3 px-2 text-white p-2 rounded-md transition w-full cursor-pointer ${
-                isProductionActive ? "text-[#bf4a63]" : ""
-              }`}
+              className={`flex items-center space-x-3 px-2 text-white p-2 rounded-md transition w-full cursor-pointer ${isProductionActive ? "text-[#bf4a63]" : ""
+                }`}
               onClick={() => setIsProductionOpen(!isProductionOpen)}
             >
               <FaSitemap
-                className={`text-lg ${
-                  isProductionActive ? "text-[#bf4a63]" : "text-white"
-                }`}
+                className={`text-lg ${isProductionActive ? "text-[#bf4a63]" : "text-white"
+                  }`}
               />
               {isExpanded && (
                 <span className={`text-[12px] ${isProductionActive ? "text-[#bf4a63]" : "text-white"}`}>
@@ -158,19 +151,17 @@ export default function Sidebar() {
               )}
               {isExpanded && (
                 <FaAngleDown
-                  className={`ml-auto transition-transform ${
-                    isProductionOpen ? "rotate-180" : ""
-                  }`}
+                  className={`ml-auto transition-transform ${isProductionOpen ? "rotate-180" : ""
+                    }`}
                 />
               )}
             </div>
 
             <div
-              className={`${
-                isExpanded
+              className={`${isExpanded
                   ? "ml-4"
                   : "absolute left-[80px] !pl-0 top-0 bg-[#04192b] p-2 border-l-3 border-[#bf4a63] rounded-lg w-[200px] shadow-lg"
-              } ${isProductionOpen ? "block" : "hidden"}`}
+                } ${isProductionOpen ? "block" : "hidden"}`}
             >
               <SidebarItem
                 text="– &nbsp;Country Level"
@@ -200,9 +191,8 @@ export default function Sidebar() {
         {allowedPrivileges.includes("Health") && (
           <div className="relative">
             <div
-              className={`flex items-center space-x-3 px-2 text-white p-2 rounded-md transition w-full cursor-pointer ${
-                isHealthActive ? "text-[#bf4a63]" : ""
-              }`}
+              className={`flex items-center space-x-3 px-2 text-white p-2 rounded-md transition w-full cursor-pointer ${isHealthActive ? "text-[#bf4a63]" : ""
+                }`}
               onClick={() => setIsHealthOpen(!isHealthOpen)}
             >
               <FaHeartbeat
@@ -215,19 +205,17 @@ export default function Sidebar() {
               )}
               {isExpanded && (
                 <FaAngleDown
-                  className={`ml-auto transition-transform ${
-                    isHealthOpen ? "rotate-180" : ""
-                  }`}
+                  className={`ml-auto transition-transform ${isHealthOpen ? "rotate-180" : ""
+                    }`}
                 />
               )}
             </div>
 
             <div
-              className={`${
-                isExpanded
+              className={`${isExpanded
                   ? "ml-4"
                   : "absolute left-[80px] !pl-0 top-0 bg-[#04192b] p-2 border-l-3 border-[#bf4a63] rounded-lg w-[200px] shadow-lg"
-              } ${isHealthOpen ? "block" : "hidden"}`}
+                } ${isHealthOpen ? "block" : "hidden"}`}
             >
               <SidebarItem
                 text="– &nbsp;System Alerter"
@@ -241,6 +229,20 @@ export default function Sidebar() {
                 href="/StringClustering"
                 isExpanded={true}
                 active={pathname === "/StringClustering"}
+                isSubmenu={true}
+              />
+              <SidebarItem
+                text="– &nbsp;System Comparator"
+                href="/SystemComparator"
+                isExpanded={true}
+                active={pathname === "/SystemComparator"}
+                isSubmenu={true}
+              />
+              <SidebarItem
+                text="– &nbsp;Efficiency & Temperature"
+                href="/EfficiencyandTemperature"
+                isExpanded={true}
+                active={pathname === "/EfficiencyandTemperature"}
                 isSubmenu={true}
               />
             </div>

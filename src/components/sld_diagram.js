@@ -11,33 +11,27 @@ import { FaCalendarAlt } from "react-icons/fa";
 
 const SingleLineDiagramDetails = () => {
   const chartContainer = useRef(null);
-  const [selectedPlant, setSelectedPlant] = useState("Coca Cola Faisalabad");
-  const [selectedVariable, setSelectedVariable] = useState("power");
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [dateRange, setDateRange] = useState(
-    moment().subtract(1, "days").toDate()
-  );
   const [formValues, setFormValues] = useState({
     plant: "Coca Cola Faisalabad",
     parameter: "power",
-    date: moment().subtract(1, "days").toDate(),
+    date: moment().subtract(40, "days").toDate(),
   });
 
   useEffect(() => {
     fetchChartData();
-  }, [selectedPlant, selectedVariable, dateRange]); // ✅ Include selectedVariable
+  }, []); // ✅ Include selectedVariable
 
   const fetchChartData = async () => {
     setLoading(true);
     setError(null);
-
-    // ✅ Clear chart when new data is being fetched
+  
     if (chartContainer.current) {
       $(chartContainer.current).empty();
     }
-
+  
     try {
       const response = await fetch(`${config.BASE_URL}sld/org`, {
         method: "POST",
@@ -45,15 +39,15 @@ const SingleLineDiagramDetails = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          plant: selectedPlant,
-          option: selectedVariable,
-          targetDate: dateRange,
+          plant: formValues.plant,
+          option: formValues.parameter,
+          targetDate: formValues.date,
         }),
       });
-
+  
       const result = await response.json();
       if (result.status === "success") {
-        setChartData(result.data[0]); // Assume first item is root node
+        setChartData(result.data[0]);
       } else {
         throw new Error("Failed to fetch chart data");
       }
@@ -64,6 +58,7 @@ const SingleLineDiagramDetails = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     if (chartData && chartContainer.current) {
@@ -139,6 +134,7 @@ const SingleLineDiagramDetails = () => {
               selected={formValues.date}
               onChange={(date) => setFormValues({ ...formValues, date })}
               className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[200px] text-white pr-8"
+              dateFormat="dd-MM-yyyy"
             />
             <FaCalendarAlt className="absolute top-2 right-2 text-blue-500 pointer-events-none" />
           </div>
@@ -147,14 +143,13 @@ const SingleLineDiagramDetails = () => {
         {/* ✅ Generate Button */}
         <button
           onClick={() => {
-            setSelectedPlant(formValues.plant);
-            setSelectedVariable(formValues.parameter);
-            setDateRange(formValues.date);
+            
             fetchChartData();
           }}
-          className="px-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
+          className={`px-4 py-1 rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 cursor-pointer text-white hover:bg-blue-600 transition"
+          }`}
         >
-          Generate
+           {loading ? "Loading..." : "Generate"}
         </button>
       </div>
 

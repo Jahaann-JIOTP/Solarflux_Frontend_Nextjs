@@ -4,7 +4,7 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import axios from "axios";
-import config from "@/config"; // Adjust based on your Next.js structure
+import config from "@/config"; 
 
 am4core.useTheme(am4themes_animated);
 
@@ -191,6 +191,7 @@ const WaterfallChart = ({
         <div id="main-section" className="w-[97%] h-[40vh] pt-[10px] mt-[10px] ml-2 bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]">
             <h2 className='text-left m-3'><b>PRODUCTION WATERFALL</b></h2>
             {loading && <div className="flex flex-col justify-center items-center h-[30vh] w-full"><div className="loader"></div></div>}
+            
             <div id="exportoptionwaterfall" className={`${loading ? "hidden" : ""}`} style={{ textAlign: "right", marginBottom: "-10px", marginRight: "10px", marginTop: "-20px", zIndex: 999 }}></div>
             <div ref={chartContainerRef} id="waterfallChart" className={`w-full h-[30vh] ${loading ? "hidden" : ""}`}></div>
         </div>

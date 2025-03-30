@@ -530,7 +530,7 @@ export default function ProductionComparison() {
               startDate={dateRange[0]}
               endDate={dateRange[1]}
               selectsRange
-              //   dateFormat="MMMM d, yyyy"
+              dateFormat="dd-MM-yyyy"
               className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[200px] text-white pr-8"
             />
             <FaCalendarAlt className="absolute top-2 right-2 text-blue-500 pointer-events-none" />
