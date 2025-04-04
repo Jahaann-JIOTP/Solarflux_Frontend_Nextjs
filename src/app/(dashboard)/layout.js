@@ -30,6 +30,7 @@ export default function DashboardLayout({ children }) {
     if (pathname.includes("StringClustering")) return "STRING CLUSTERING";
     if (pathname.includes("SystemComparator")) return "SYSTEM COMPARATOR";
     if (pathname.includes("EfficiencyandTemperature")) return "EFFICIENCY & TEMPERATURE";
+    if (pathname.includes("SuppressionView")) return "SUPPRESSION";
     if (pathname.includes("Settings")) return "SETTINGS";
     if (pathname.includes("Reports")) return "REPORTS";
     if (pathname.includes("SingleLineDiagram")) return "SINGLE LINE DIAGRAM";
