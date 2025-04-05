@@ -28,8 +28,8 @@ const ComparisonCharts = () => {
         setLoading(true);
         try {
             const { data } = await axios.post(`https://solarfluxapi.nexalyze.com/chart_data`, {
-                date: formValues.date,
-                top_n: topN,
+                date: moment(formValues.date).format('YYYY-MM-DD'),
+                top_n: parseInt(topN) || 0,
             });
 
             if (data.status === 'success') {
@@ -107,8 +107,81 @@ const ComparisonCharts = () => {
         chart.legend.labels.template.fontSize = 12;
     
         chart.cursor = new am4charts.XYCursor();
+        addControls();
     };
-    
+    const addControls = () => {
+        const controlsWrapper = document.getElementById("exportoption");
+        if (!controlsWrapper) return;
+      
+        controlsWrapper.innerHTML = "";
+      
+        const createButton = (svgPath, callback, tooltip) => {
+          const button = document.createElement("button");
+          button.style.backgroundColor = "transparent";
+          button.style.border = "none";
+          button.style.padding = "5px";
+          button.style.cursor = "pointer";
+          button.style.display = "inline-flex";
+          button.style.justifyContent = "center";
+          button.style.alignItems = "center";
+          button.style.width = "30px";
+          button.style.height = "30px";
+          button.style.margin = "2px";
+          button.title = tooltip;
+      
+          button.innerHTML = `
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" 
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+              xmlns="http://www.w3.org/2000/svg">
+              ${svgPath}
+            </svg>
+          `;
+      
+          button.addEventListener("click", callback);
+          controlsWrapper.appendChild(button);
+        };
+      
+        // Export as PNG for all charts
+        createButton(
+          `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
+           <rect x="4" y="17" width="16" height="4" rx="1" ry="1" />`,
+          () => {
+            Object.values(chartRefs.current).forEach((chart) => {
+              if (chart) chart.exporting.export("png");
+            });
+          },
+          "Export All as PNG"
+        );
+      
+        // Export as Excel (XLSX) for all charts
+        createButton(
+          `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+           <path d="M14 3v5h5M9 17l-3-3m0 0 3-3m-3 3h6" />`,
+          () => {
+            Object.values(chartRefs.current).forEach((chart) => {
+              if (chart) chart.exporting.export("xlsx");
+            });
+          },
+          "Export All as Excel"
+        );
+      
+        // Fullscreen toggle
+        createButton(
+          `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
+          () => {
+            const chartElement = document.getElementById("controls42");
+            if (!document.fullscreenElement) {
+              chartElement?.requestFullscreen().catch((err) =>
+                console.error("Error attempting to enable fullscreen mode:", err.message)
+              );
+            } else {
+              document.exitFullscreen();
+            }
+          },
+          "Toggle Fullscreen"
+        );
+      };
+      
 
     return (
         <div className='p-2'>
@@ -123,7 +196,17 @@ const ComparisonCharts = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                     <label>Compare Similar Days:</label>
-                    <input type="number" value={topN} onChange={(e) => setTopN(e.target.value)} className="w-[60px] h-[30px] text-black bg-white rounded px-[10px]" />
+                    <input
+  type="number"
+  value={topN}
+  onChange={(e) => {
+    const value = e.target.value;
+    setTopN(value === '' ? '' : parseInt(value)); // allows empty temporarily
+  }}
+  className="w-[60px] h-[30px] text-black bg-white rounded px-[10px]"
+/>
+
+
                 </div>
                 <div className="flex items-center space-x-2">
                     <label className="text-white">Date:</label>
@@ -165,9 +248,9 @@ const ComparisonCharts = () => {
                 )}
 
                 {loading && <div id="loader"><div className="spinner" /></div>}
-                <div id="exportoptionsupp" className={`${loading ? "hidden" : "text-right -mb-2.5 -mt-1 mr-2.5 z-[999]"}`}
+                <div id="exportoption" className={`${loading ? "hidden" : "text-right -mb-2.5 -mt-1 mr-2.5 z-[999]"}`}
                 ></div>
-                <div className="charts-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                <div className="charts-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }} id="controls42">
                     <div className={`h-[30vh] ${loading ? "hidden" : ""}`} id="generated-power-chart" style={{ flex: 1, minWidth: 300, margin: 10 }} />
                     <div className={`h-[30vh] ${loading ? "hidden" : ""}`} id="predicted-power-chart" style={{ flex: 1, minWidth: 300, margin: 10 }} />
                     <div className={`h-[30vh] ${loading ? "hidden" : ""}`} id="radiation-intensity-chart" style={{ flex: 1, minWidth: 300, margin: 10 }} />
