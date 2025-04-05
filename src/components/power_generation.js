@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import axios from "axios";
 import moment from "moment";
-import $ from "jquery";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
@@ -13,8 +12,6 @@ const PowerChart = () => {
     const [loading, setLoading] = useState(true);
     const [option, setOption] = useState(1);
     const [selectedPlant, setSelectedPlant] = useState("NE=53278269");
-    const [fromDate, setFromDate] = useState("");
-    const [toDate, setToDate] = useState("");
     const [chartInstance, setChartInstance] = useState(null);
 
     const [dateRange, setDateRange] = useState([
@@ -309,72 +306,72 @@ const PowerChart = () => {
     const addControls = () => {
         const controlsWrapper = document.getElementById("exportoptionpowergen");
         controlsWrapper.innerHTML = "";
-    
+
         const createButton = (svgPath, callback, tooltip) => {
-          const button = document.createElement("button");
-          button.style.backgroundColor = "transparent";
-          button.style.border = "none";
-          button.style.padding = "5px";
-          button.style.cursor = "pointer";
-          button.style.display = "inline-flex";
-          button.style.justifyContent = "center";
-          button.style.alignItems = "center";
-          button.style.width = "30px";
-          button.style.height = "30px";
-          button.style.margin = "2px";
-          button.title = tooltip; // Add tooltip
-    
-          button.innerHTML = `
+            const button = document.createElement("button");
+            button.style.backgroundColor = "transparent";
+            button.style.border = "none";
+            button.style.padding = "5px";
+            button.style.cursor = "pointer";
+            button.style.display = "inline-flex";
+            button.style.justifyContent = "center";
+            button.style.alignItems = "center";
+            button.style.width = "30px";
+            button.style.height = "30px";
+            button.style.margin = "2px";
+            button.title = tooltip; // Add tooltip
+
+            button.innerHTML = `
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" 
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
                         xmlns="http://www.w3.org/2000/svg">
                         ${svgPath}
                     </svg>
                 `;
-    
-          button.addEventListener("click", callback);
-          controlsWrapper.appendChild(button);
+
+            button.addEventListener("click", callback);
+            controlsWrapper.appendChild(button);
         };
-    
+
         // Export as PNG
         createButton(
-          `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
+            `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
                  <rect x="4" y="17" width="16" height="4" rx="1" ry="1" />`,
-          () => {
-            if (chartRef.current) chartRef.current.exporting.export("png");
-          },
-          "Export as PNG"
+            () => {
+                if (chartRef.current) chartRef.current.exporting.export("png");
+            },
+            "Export as PNG"
         );
-    
+
         // Export as XLSX
         createButton(
-          `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+            `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
                  <path d="M14 3v5h5M9 17l-3-3m0 0 3-3m-3 3h6" />`,
-          () => {
-            if (chartRef.current) chartRef.current.exporting.export("xlsx");
-          },
-          "Export as XLSX"
+            () => {
+                if (chartRef.current) chartRef.current.exporting.export("xlsx");
+            },
+            "Export as XLSX"
         );
-    
+
         // Fullscreen Mode
         createButton(
-          `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
-          () => {
-            const chartElement = document.getElementById("chartdiv");
-            if (!document.fullscreenElement) {
-              chartElement.requestFullscreen().catch((err) => {
-                console.error(
-                  "Error attempting to enable fullscreen mode:",
-                  err.message
-                );
-              });
-            } else {
-              document.exitFullscreen();
-            }
-          },
-          "Toggle Fullscreen"
+            `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
+            () => {
+                const chartElement = document.getElementById("chartdiv");
+                if (!document.fullscreenElement) {
+                    chartElement.requestFullscreen().catch((err) => {
+                        console.error(
+                            "Error attempting to enable fullscreen mode:",
+                            err.message
+                        );
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            },
+            "Toggle Fullscreen"
         );
-      };
+    };
 
     useEffect(() => {
         fetchChartData(option);
@@ -397,7 +394,7 @@ const PowerChart = () => {
                     </select>
                 </div>
                 <div className="flex items-center space-x-2">
-                <label className="text-white">Interval:</label>
+                    <label className="text-white">Interval:</label>
                     <div className="text-[14px] relative inline-flex min-w-[180px]">
                         <DatePicker
                             selected={dateRange[0]}
@@ -411,7 +408,16 @@ const PowerChart = () => {
                         <FaCalendarAlt className="absolute top-2 right-2 text-blue-500 pointer-events-none" />
                     </div>
                 </div>
+                <button
+                    onClick={() => {
 
+                        fetchChartData(option);
+                    }}
+                    className={`px-4 py-1 rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 cursor-pointer text-white hover:bg-blue-600 transition"
+                        }`}
+                >
+                    {loading ? "Loading..." : "Generate"}
+                </button>
 
             </div>
             <div
@@ -426,15 +432,19 @@ const PowerChart = () => {
                     <div className="flex items-center gap-3 mr-3 text-white" style={{ fontSize: "0.9vw" }}>
                         <button
                             onClick={() => setOption(1)}
-                            className={`${option === 1 ? 'bg-[#BF4A63]' : 'bg-[#a1838a]'}`}
-                            style={{ fontSize: "0.9vw", padding: "5px 10px", height: "35px", width: "80px", borderRadius: "5px", border: "0px", color: "white" }}
+                            className={`
+                                ${option === 1 ? 'bg-[#BF4A63]' : 'bg-[#a1838a]'}
+                                text-white text-[0.9vw] px-[10px] py-[5px] h-[35px] w-[80px] rounded-[5px] border-0 cursor-pointer
+                              `}
                         >
                             Hourly
                         </button>
                         <button
                             onClick={() => setOption(2)}
-                            className={`${option === 2 ? 'bg-[#BF4A63]' : 'bg-[#a1838a]'}`}
-                            style={{ fontSize: "0.9vw", padding: "5px 10px", height: "35px", width: "80px", borderRadius: "5px", border: "0px", color: "white" }}
+                            className={`
+                                ${option === 2 ? 'bg-[#BF4A63]' : 'bg-[#a1838a]'}
+                                text-white text-[0.9vw] px-[10px] py-[5px] h-[35px] w-[80px] rounded-[5px] border-0 cursor-pointer
+                              `}
                         >
                             Daily
                         </button>
@@ -442,8 +452,8 @@ const PowerChart = () => {
                 </div>
                 {loading && (
                     <div className="flex flex-col justify-center items-center h-[30vh] w-full">
-                    <div className="loader"></div>
-                  </div>
+                        <div className="loader"></div>
+                    </div>
                 )}
                 <div id="exportoptionpowergen" className={`${loading ? "hidden" : "text-right -mb-2.5 -mt-1 mr-2.5 z-[999]"}`}
                 ></div>
