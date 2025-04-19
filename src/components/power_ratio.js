@@ -37,8 +37,8 @@ const PowerRatioChart = () => {
         setLoading(true);
         try {
             const response = await axios.post(`https://solarfluxapi.nexalyze.com/power_ratio`, {
-                start_date: fromDate,
-                end_date: toDate,
+                start_date: moment(dateRange[0]).format("YYYY-MM-DD"),
+                end_date: moment(dateRange[1]).format("YYYY-MM-DD"),
                 plant: selectedPlant,
             });
             if (response.data.status === "success") {
@@ -118,72 +118,72 @@ const PowerRatioChart = () => {
     const addControls = () => {
         const controlsWrapper = document.getElementById("exportoptionpoweratio");
         controlsWrapper.innerHTML = "";
-    
+
         const createButton = (svgPath, callback, tooltip) => {
-          const button = document.createElement("button");
-          button.style.backgroundColor = "transparent";
-          button.style.border = "none";
-          button.style.padding = "5px";
-          button.style.cursor = "pointer";
-          button.style.display = "inline-flex";
-          button.style.justifyContent = "center";
-          button.style.alignItems = "center";
-          button.style.width = "30px";
-          button.style.height = "30px";
-          button.style.margin = "2px";
-          button.title = tooltip; // Add tooltip
-    
-          button.innerHTML = `
+            const button = document.createElement("button");
+            button.style.backgroundColor = "transparent";
+            button.style.border = "none";
+            button.style.padding = "5px";
+            button.style.cursor = "pointer";
+            button.style.display = "inline-flex";
+            button.style.justifyContent = "center";
+            button.style.alignItems = "center";
+            button.style.width = "30px";
+            button.style.height = "30px";
+            button.style.margin = "2px";
+            button.title = tooltip; // Add tooltip
+
+            button.innerHTML = `
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" 
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
                         xmlns="http://www.w3.org/2000/svg">
                         ${svgPath}
                     </svg>
                 `;
-    
-          button.addEventListener("click", callback);
-          controlsWrapper.appendChild(button);
+
+            button.addEventListener("click", callback);
+            controlsWrapper.appendChild(button);
         };
-    
+
         // Export as PNG
         createButton(
-          `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
+            `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
                  <rect x="4" y="17" width="16" height="4" rx="1" ry="1" />`,
-          () => {
-            if (chartRef.current) chartRef.current.exporting.export("png");
-          },
-          "Export as PNG"
+            () => {
+                if (chartRef.current) chartRef.current.exporting.export("png");
+            },
+            "Export as PNG"
         );
-    
+
         // Export as XLSX
         createButton(
-          `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+            `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
                  <path d="M14 3v5h5M9 17l-3-3m0 0 3-3m-3 3h6" />`,
-          () => {
-            if (chartRef.current) chartRef.current.exporting.export("xlsx");
-          },
-          "Export as XLSX"
+            () => {
+                if (chartRef.current) chartRef.current.exporting.export("xlsx");
+            },
+            "Export as XLSX"
         );
-    
+
         // Fullscreen Mode
         createButton(
-          `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
-          () => {
-            const chartElement = document.getElementById("powerRatioChart");
-            if (!document.fullscreenElement) {
-              chartElement.requestFullscreen().catch((err) => {
-                console.error(
-                  "Error attempting to enable fullscreen mode:",
-                  err.message
-                );
-              });
-            } else {
-              document.exitFullscreen();
-            }
-          },
-          "Toggle Fullscreen"
+            `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
+            () => {
+                const chartElement = document.getElementById("powerRatioChart");
+                if (!document.fullscreenElement) {
+                    chartElement.requestFullscreen().catch((err) => {
+                        console.error(
+                            "Error attempting to enable fullscreen mode:",
+                            err.message
+                        );
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            },
+            "Toggle Fullscreen"
         );
-      };
+    };
     useEffect(() => {
         return () => {
             if (chartRef.current) chartRef.current.dispose();
@@ -192,54 +192,54 @@ const PowerRatioChart = () => {
 
     return (
         <div className="p-2">
-                <div className="flex justify-end space-x-4 mb-5 items-center">
-                    <div className="flex items-center space-x-2">
-                        <label className="text-white">Plant:</label>
-                        <select value={selectedPlant} onChange={(e) => setSelectedPlant(e.target.value)} className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]">
-                            {plantOptions.map((option) => (
-                                <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <label className="text-white">Interval:</label>
-                        <div className="text-[14px] relative inline-flex min-w-[180px]">
-                            <DatePicker
-                                selected={dateRange[0]}
-                                onChange={(dates) => dates && setDateRange(dates)}
-                                startDate={dateRange[0]}
-                                endDate={dateRange[1]}
-                                selectsRange
-                                className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[200px] text-white pr-8"
-                                dateFormat="dd-MM-yyyy"
-                            />
-                            <FaCalendarAlt className="absolute top-2 right-2 text-blue-500 pointer-events-none" />
-                        </div>
-                    </div>
-                    <button
-          onClick={() => {
-            
-            fetchData();
-          }}
-          className={`px-4 py-1 rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 cursor-pointer text-white hover:bg-blue-600 transition"
-          }`}
-        >
-           {loading ? "Loading..." : "Generate"}
-        </button>
+            <div className="flex justify-end space-x-4 mb-5 items-center">
+                <div className="flex items-center space-x-2">
+                    <label className="text-white">Plant:</label>
+                    <select value={selectedPlant} onChange={(e) => setSelectedPlant(e.target.value)} className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]">
+                        {plantOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
                 </div>
+                <div className="flex items-center space-x-2">
+                    <label className="text-white">Interval:</label>
+                    <div className="text-[14px] relative inline-flex min-w-[180px]">
+                        <DatePicker
+                            selected={dateRange[0]}
+                            onChange={(dates) => dates && setDateRange(dates)}
+                            startDate={dateRange[0]}
+                            endDate={dateRange[1]}
+                            selectsRange
+                            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] w-[200px] text-white pr-8"
+                            dateFormat="dd-MM-yyyy"
+                        />
+                        <FaCalendarAlt className="absolute top-2 right-2 text-blue-500 pointer-events-none" />
+                    </div>
+                </div>
+                <button
+                    onClick={() => {
+
+                        fetchData();
+                    }}
+                    className={`px-4 py-1 rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 cursor-pointer text-white hover:bg-blue-600 transition"
+                        }`}
+                >
+                    {loading ? "Loading..." : "Generate"}
+                </button>
+            </div>
             <div
                 id="main-section"
                 className="w-full h-[40vh] pt-[10px] bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
             >
                 <div className="flex justify-between items-center mb-2">
                     <h2 className="text-left m-3 text-white font-bold text-[1vw]">
-                    PRODUCTION EFFICIENCY
+                        % OF PREDICTION
                     </h2>
                 </div>
                 {loading && (
                     <div className="flex flex-col justify-center items-center h-[30vh] w-full">
-                    <div className="loader"></div>
-                  </div>
+                        <div className="loader"></div>
+                    </div>
                 )}
                 <div id="exportoptionpoweratio" className={`${loading ? "hidden" : "text-right -mb-2.5 -mt-1 mr-2.5 z-[999]"}`}
                 ></div>

@@ -53,12 +53,13 @@ const InterSystemComparison = () => {
     }, [inverter3]);
 
     useEffect(() => {
-        if (inverter2 && mppt2) fetchStrings(inverter2, mppt2, setStringOptions2);
+        if (inverter2 && mppt2) fetchStrings(inverter2, mppt2, plant2, setStringOptions2);
     }, [mppt2]);
-
+    
     useEffect(() => {
-        if (inverter3 && mppt3) fetchStrings(inverter3, mppt3, setStringOptions3);
+        if (inverter3 && mppt3) fetchStrings(inverter3, mppt3, plant3, setStringOptions3);
     }, [mppt3]);
+    
 
     const fetchDeviceIds = async (plant, setFn) => {
         try {
@@ -78,14 +79,19 @@ const InterSystemComparison = () => {
         }
     };
 
-    const fetchStrings = async (devId, mppt, setFn) => {
+    const fetchStrings = async (devId, mppt, plant, setFn) => {
         try {
-            const res = await axios.post(`${baseUrl}production/get-strings`, { devId, mppt });
+            const res = await axios.post(`${baseUrl}solaranalytics/get-strings`, {
+                    "Plant": plant,
+                    "devId": devId,
+                    "mppt": mppt,
+            });
             setFn(res.data);
         } catch (err) {
             console.error(err);
         }
     };
+    
 
     const fetchAllChartData = async () => {
         setLoading1(true);
@@ -174,7 +180,23 @@ const InterSystemComparison = () => {
         
         // Y-Axis (Value Axis)
         const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-        valueAxis.title.text = "Hourly Energy (kWh)";
+        let yAxisTitle = "";
+switch (selectedParameter) {
+    case "power":
+        yAxisTitle = "Power (kW)";
+        break;
+    case "voltage":
+        yAxisTitle = "Voltage (V)";
+        break;
+    case "current":
+        yAxisTitle = "Current (A)";
+        break;
+    default:
+        yAxisTitle = "Value";
+}
+
+valueAxis.title.text = yAxisTitle;
+
         valueAxis.title.rotation = -90;
         valueAxis.title.fill = am4core.color("#ffffff");
         valueAxis.title.fontSize = 12;

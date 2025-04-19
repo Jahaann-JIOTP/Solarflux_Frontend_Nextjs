@@ -152,20 +152,21 @@ export default function NationWide() {
     };
 
     // Export as PNG
-    createButton(
-        `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
-         <rect x="4" y="17" width="16" height="4" rx="1" ry="1" />`,
-        () => { if (chartRef.current) chartRef.current.exporting.export("png"); },
-        "Export as PNG"
-    );
+createButton(
+  `<path d="M12 2L19 9H14V15H10V9H5L12 2Z" />
+   <rect x="4" y="17" width="16" height="4" rx="1" ry="1" />`,
+  () => { if (window.chart) window.chart.exporting.export("png"); },
+  "Export as PNG"
+);
 
-    // Export as XLSX
-    createButton(
-        `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
-         <path d="M14 3v5h5M9 17l-3-3m0 0 3-3m-3 3h6" />`,
-        () => { if (chartRef.current) chartRef.current.exporting.export("xlsx"); },
-        "Export as XLSX"
-    );
+// Export as XLSX
+createButton(
+  `<path d="M4 3h12l5 5v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+   <path d="M14 3v5h5M9 17l-3-3m0 0 3-3m-3 3h6" />`,
+  () => { if (window.chart) window.chart.exporting.export("xlsx"); },
+  "Export as XLSX"
+);
+
 
     // Fullscreen Mode
     createButton(

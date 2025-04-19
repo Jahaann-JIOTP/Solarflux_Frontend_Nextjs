@@ -81,7 +81,7 @@ export default function ProductionComparison() {
         chartRef.current = null;
       }
   
-      const response = await axios.post("http://15.206.128.214:5000/analysis/aggregate-data1", {
+      const response = await axios.post(config.BASE_URL + "analysis/aggregate-data1", {
         plant: selectedPlant,
         inverter: selectedInverter || null,
         mppt: selectedMppt || null,
@@ -485,7 +485,7 @@ export default function ProductionComparison() {
             ))}
           </select>
         </div>
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <label className="text-white">Parameter:</label>
           <select
             className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
@@ -496,7 +496,7 @@ export default function ProductionComparison() {
             <option value="Current">Current</option>
             <option value="Voltage">Voltage</option>
           </select>
-        </div>
+        </div> */}
         <div className="flex items-center space-x-2">
           <label className="text-white">Resolution:</label>
           <select

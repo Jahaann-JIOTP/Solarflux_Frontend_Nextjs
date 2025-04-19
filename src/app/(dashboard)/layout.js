@@ -33,6 +33,7 @@ export default function DashboardLayout({ children }) {
     if (pathname.includes("SuppressionView")) return "SUPPRESSION";
     if (pathname.includes("Settings")) return "SETTINGS";
     if (pathname.includes("Reports")) return "REPORTS";
+    if (pathname.includes("PowerAnalytics")) return "Power Analytics";
     if (pathname.includes("SingleLineDiagram")) return "SINGLE LINE DIAGRAM";
     return "Dashboard"; // Default title
   };

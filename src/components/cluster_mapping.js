@@ -257,106 +257,153 @@ const ClusterCharts = () => {
                     </div>
                 </div>
             )}
+
+            {/* Cluster Cards (moved to top) */}
             {!loading && activeTab === "table" && (
                 <div
                     className="w-full h-[69vh] pt-[10px] mt-[20px] bg-[#0d2d42] p-6 rounded-lg mb-2 text-white shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)] overflow-auto"
                     id="main-section"
                 >
+                <div className="w-full overflow-x-auto flex justify-center">
+                    <div className="flex gap-6 px-4 py-4 max-w-[90%] overflow-x-auto" id="main-section">
+                        {Object.entries(clusterCounts).map(([clusterId, count]) => (
+                            <div
+                                key={clusterId}
+                                className="relative min-w-[290px] max-w-[290px] rounded-2xl p-6 text-center bg-gradient-to-br from-[#0f2d3e] to-[#11394e] shadow-[0_0_25px_rgba(0,136,255,0.3)] hover:shadow-[0_0_30px_rgba(0,136,255,0.6)] transition duration-300 transform hover:-translate-y-1"
+                            >
+                                {/* Floating Icon */}
+                                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-[white] text-white w-15 h-15 flex items-center justify-center rounded-full shadow-lg border-4 border-[#0f2d3e] text-2xl">
+                                    <svg width="30" height="30" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="black" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="40" y1="180" x2="40" y2="20" stroke="black" />
+                                        <line x1="40" y1="180" x2="180" y2="180" stroke="black" />
+                                        <rect x="50" y="50" width="15" height="15" fill="#E0B24D" stroke="black" />
+                                        <rect x="70" y="70" width="15" height="15" fill="#E0B24D" stroke="black" />
+                                        <rect x="50" y="90" width="15" height="15" fill="#E0B24D" stroke="black" />
+                                        <rect x="30" y="70" width="15" height="15" fill="#E0B24D" stroke="black" />
+                                        <rect x="100" y="40" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                        <rect x="80" y="70" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                        <rect x="120" y="70" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                        <rect x="100" y="90" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                        <rect x="140" y="90" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                        <circle cx="70" cy="160" r="8" fill="#5DADE2" stroke="black" />
+                                        <circle cx="90" cy="140" r="8" fill="#5DADE2" stroke="black" />
+                                        <circle cx="110" cy="160" r="8" fill="#5DADE2" stroke="black" />
+                                        <circle cx="130" cy="140" r="8" fill="#5DADE2" stroke="black" />
+                                    </svg>
+                                </div>
+                                <div className="mt-8">
+                                    <h4 className="text-lg font-semibold text-white mb-1 tracking-wide">
+                                        Cluster {Number(clusterId) + 1}
+                                    </h4>
+                                    <p className="text-sm text-blue-300 mb-2">Total Data Points</p>
+                                    <p className="text-2xl font-extrabold text-white">{count}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+           
                     {/* Header */}
                     <h3 className="text-2xl font-bold mb-4 tracking-wide text-center mt-5">
-                        Cluster Summary📜
+                        Cluster Inverter/String Summary 📊
                     </h3>
-                    {/* Meta Summary */}
-                    <div className="flex flex-wrap justify-center gap-10 text-sm md:text-base mb-8">
-                        <div className="w-full max-w-2xl mx-auto mb-8">
-                            <table className="w-full text-white border border-gray-600 rounded-md border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-800 text-left">
-                                        <th className="p-3 border border-gray-600">Label</th>
-                                        <th className="p-3 border border-gray-600">Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="hover:bg-gray-700">
-                                        <td className="p-3 border border-gray-600 font-medium">Total Clusters</td>
-                                        <td className="p-3 border border-gray-600">{Object.keys(clusterCounts).length}</td>
-                                    </tr>
-                                    <tr className="hover:bg-gray-700">
-                                        <td className="p-3 border border-gray-600 font-medium">Plant</td>
-                                        <td className="p-3 border border-gray-600">{selectedPlant}</td>
-                                    </tr>
-                                    <tr className="hover:bg-gray-700">
-                                        <td className="p-3 border border-gray-600 font-medium">Date Range</td>
-                                        <td className="p-3 border border-gray-600">
-                                            {moment(dateRange[0]).format("MMM D, YYYY")} - {moment(dateRange[1]).format("MMM D, YYYY")}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    {/* Cluster Cards */}
-                    <div className="w-full overflow-x-auto flex justify-center">
-                        <div className="flex gap-6 px-4 py-4 max-w-[90%] overflow-x-auto" id="main-section">
-                            {Object.entries(clusterCounts).map(([clusterId, count]) => (
-                                <div
-                                    key={clusterId}
-                                    className="relative min-w-[290px] max-w-[290px] rounded-2xl p-6 text-center bg-gradient-to-br from-[#0f2d3e] to-[#11394e] shadow-[0_0_25px_rgba(0,136,255,0.3)] hover:shadow-[0_0_30px_rgba(0,136,255,0.6)] transition duration-300 transform hover:-translate-y-1"
-                                >
-                                    {/* Floating Icon */}
-                                    <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-[white] text-white w-15 h-15 flex items-center justify-center rounded-full shadow-lg border-4 border-[#0f2d3e] text-2xl">
-                                        <svg
-                                            width="30" height="30"
-                                            viewBox="0 0 200 200"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            stroke="black"
-                                            stroke-width="4"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        >
-                                            <line x1="40" y1="180" x2="40" y2="20" stroke="black" />
-                                            <line x1="40" y1="180" x2="180" y2="180" stroke="black" />
 
-                                            <rect x="50" y="50" width="15" height="15" fill="#E0B24D" stroke="black" />
-                                            <rect x="70" y="70" width="15" height="15" fill="#E0B24D" stroke="black" />
-                                            <rect x="50" y="90" width="15" height="15" fill="#E0B24D" stroke="black" />
-                                            <rect x="30" y="70" width="15" height="15" fill="#E0B24D" stroke="black" />
-
-                                            <rect x="100" y="40" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                            <rect x="80" y="70" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                            <rect x="120" y="70" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                            <rect x="100" y="90" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                            <rect x="140" y="90" width="15" height="15" fill="#E46C6C" stroke="black" />
-
-                                            <circle cx="70" cy="160" r="8" fill="#5DADE2" stroke="black" />
-                                            <circle cx="90" cy="140" r="8" fill="#5DADE2" stroke="black" />
-                                            <circle cx="110" cy="160" r="8" fill="#5DADE2" stroke="black" />
-                                            <circle cx="130" cy="140" r="8" fill="#5DADE2" stroke="black" />
-                                        </svg>
-                                    </div>
-                                    <div className="mt-8">
-                                        <h4 className="text-lg font-semibold text-white mb-1 tracking-wide">
+                    {/* Table Construction */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-white border border-gray-600 rounded-md border-collapse">
+                            <thead>
+                                <tr className="bg-gray-800 text-left">
+                                    <th className="p-3 border border-gray-600">Inverter</th>
+                                    {Object.keys(clusters).map((clusterId) => (
+                                        <th key={clusterId} className="p-3 border border-gray-600">
                                             Cluster {Number(clusterId) + 1}
-                                        </h4>
-                                        <p className="text-sm text-blue-300 mb-2">Total Data Points</p>
-                                        <p className="text-2xl font-extrabold text-white">{count}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+  {(() => {
+    const inverterSet = new Set();
+    Object.values(clusters).forEach((entries) => {
+      entries.forEach((item) => {
+        const keyParts = item.Key?.split("-") || [];
+        const inverter = keyParts[1];
+        if (inverter) inverterSet.add(inverter);
+      });
+    });
+    const inverters = Array.from(inverterSet);
+
+    const clusterTotals = {}; // For summary row
+
+    return (
+      <>
+        {inverters.map((inverter) => (
+          <tr key={inverter} className="hover:bg-gray-700">
+            <td className="p-3 border border-gray-600 font-medium">{inverter}</td>
+            {Object.keys(clusters).map((clusterId) => {
+              const relevantEntries = clusters[clusterId].filter((item) => {
+                const keyParts = item.Key?.split("-") || [];
+                return keyParts[1] === inverter;
+              });
+              const uniqueMPPTs = new Set();
+              const uniqueStrings = new Set();
+              relevantEntries.forEach((item) => {
+                const parts = item.Key?.split("-") || [];
+                if (parts[2]) uniqueMPPTs.add(parts[2]);
+                if (parts[3]) uniqueStrings.add(parts[3]);
+              });
+
+              const stringCount = uniqueStrings.size;
+              const mpptCount = uniqueMPPTs.size;
+
+              // Update totals
+              if (!clusterTotals[clusterId]) {
+                clusterTotals[clusterId] = { strings: 0 };
+              }
+              clusterTotals[clusterId].strings += stringCount;
+
+              const stringPercentage = ((stringCount / 28) * 100).toFixed(1);
+
+              return (
+                <td key={clusterId} className="p-3 border border-gray-600 text-sm">
+                  <div>{stringCount} Strings / {mpptCount} MPPTs</div>
+                  <div className="text-blue-300">{stringPercentage}%</div>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+
+        {/* Summary Row */}
+        <tr className="bg-[#09364f] font-semibold">
+          <td className="p-3 border border-gray-600">Average (Strings)</td>
+          {Object.keys(clusters).map((clusterId) => {
+            const total = clusterTotals[clusterId]?.strings || 0;
+            const average = (total / 144).toFixed(2);
+            const percentage = ((total / 144) * 100).toFixed(1);
+            return (
+              <td key={`summary-${clusterId}`} className="p-3 border border-gray-600 text-sm">
+                <div>Total: {total}</div>
+                <div>Avg: {average} ({percentage}%)</div>
+              </td>
+            );
+          })}
+        </tr>
+      </>
+    );
+  })()}
+</tbody>
+
+                        </table>
                     </div>
-
-
                 </div>
-
-
             )}
+
 
             {/* Charts Tab View */}
             {activeTab === "charts" && (
                 <div
-                    className="flex overflow-x-auto gap-6 w-full h-[69vh] pt-[10px] mt-[20px] bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
+                    className="flex overflow-auto gap-6 w-full h-[69vh] pt-[10px] mt-[20px] bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
                     id="main-section"
                 >
                     <div className="flex flex-nowrap gap-6">

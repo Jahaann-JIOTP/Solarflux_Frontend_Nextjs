@@ -6,8 +6,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation"; // ✅ Import useRouter for redirection
 import axios from "axios";
 import Swal from "sweetalert2"; // ✅ Import SweetAlert for notifications
-
-const API_BASE_URL = "http://15.206.128.214:5000"; // ✅ Backend URL
+import config from "@/config";
+const API_BASE_URL = config.BASE_URL;
 
 export default function Login() {
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+      const response = await axios.post(`${API_BASE_URL}auth/login`, credentials);
       
       if (response.data && response.data.access_token) {
         // ✅ Store Token

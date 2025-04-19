@@ -67,6 +67,7 @@ const ChartComponent = () => {
     const fetchMpptIds = async () => {
         try {
             const response = await axios.post(`${baseUrl}production/get-mppt`, {
+                station: selectedOptionplant,
                 devId: selectedOptioninverter,
             });
             setDropdown1Optionsmppt(response.data);
@@ -77,7 +78,8 @@ const ChartComponent = () => {
 
     const fetchStringIds = async () => {
         try {
-            const response = await axios.post(`${baseUrl}production/get-strings`, {
+            const response = await axios.post(`${baseUrl}solaranalytics/get-strings`, {
+                Plant: selectedOptionplant,
                 devId: selectedOptioninverter,
                 mppt: selectedOptionmppt,
             });
@@ -86,7 +88,19 @@ const ChartComponent = () => {
             console.error("Error fetching strings", error);
         }
     };
-
+    const getYAxisTitle = (param) => {
+        switch (param) {
+          case "power":
+            return "Power (kW)";
+          case "voltage":
+            return "Voltage (V)";
+          case "current":
+            return "Current (A)";
+          default:
+            return "Value";
+        }
+      };
+      
     const fetchAllChartData = async (fromDate, toDate) => {
         setLoading(true);
         if (sankeyChartRef.current) sankeyChartRef.current.dispose();
@@ -124,7 +138,14 @@ const ChartComponent = () => {
                     return hourEntry;
                 });
 
-            createChart(chartdiv3Ref.current, formatChartData(chart1Data), chart1Data.map(d => d.date), "Power (KW)", sankeyChartRef);
+                createChart(
+                    chartdiv3Ref.current,
+                    formatChartData(chart1Data),
+                    chart1Data.map(d => d.date),
+                    getYAxisTitle(selectedParameter),
+                    sankeyChartRef
+                  );
+                  
             createChart(chartdivSNRef.current, formatChartData(chart2Data), chart2Data.map(d => d.date), "Solar Irradiance", snChartRef);
             addControls();
         } catch (error) {

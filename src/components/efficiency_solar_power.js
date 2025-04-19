@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 import am4themes_animated from '@amcharts/amcharts4/themes/animated';
-import config from "@/config"; 
+import config from "@/config";
 am4core.useTheme(am4themes_animated);
 
 const EfficiencyChart = ({
@@ -91,12 +91,15 @@ const EfficiencyChart = ({
             categoryAxis.title.fill = am4core.color("#FFFFFF");
 
             const valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+            valueAxis.min = 0;
+            valueAxis.strictMinMax = true;
             valueAxis.title.text = "Efficiency (%)";
             valueAxis.title.fill = am4core.color("#FFFFFF");
             valueAxis.title.fontSize = 12;
             valueAxis.renderer.labels.template.fill = am4core.color("#FFFFFF");
             valueAxis.renderer.labels.template.fontSize = 12;
             valueAxis.renderer.grid.template.stroke = am4core.color("#FFFFFF");
+
 
             const series = chart.series.push(new am4charts.LineSeries());
             series.dataFields.valueY = "efficiency";

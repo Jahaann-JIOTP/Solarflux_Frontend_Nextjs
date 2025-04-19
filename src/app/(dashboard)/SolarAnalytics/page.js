@@ -172,24 +172,16 @@ export default function PlantAnalysis() {
             </div>
 
             {/* 🔹 Chart Section */}
-            <div className="grid grid-cols-2 gap-4 mt-2">
+            <div className="grid grid-cols-2 gap-1 mt-2">
+            <EfficiencyChart
+                    selectedOptionplant1={chartParams.plant}
+                    selectedOptioninverter1={chartParams.inverter}
+                    selectedOptionmppt1={chartParams.mppt}
+                    selectedOptionstring1={chartParams.string}
+                    customFromDate={chartParams.start_date}
+                    customToDate={chartParams.end_date}
+                />
                 <ProductionLayeredColumn
-                    selectedOptionplant1={chartParams.plant}
-                    selectedOptioninverter1={chartParams.inverter}
-                    selectedOptionmppt1={chartParams.mppt}
-                    selectedOptionstring1={chartParams.string}
-                    customFromDate={chartParams.start_date}
-                    customToDate={chartParams.end_date}
-                />
-                <WaterfallChart
-                    selectedOptionplant1={chartParams.plant}
-                    selectedOptioninverter1={chartParams.inverter}
-                    selectedOptionmppt1={chartParams.mppt}
-                    selectedOptionstring1={chartParams.string}
-                    customFromDate={chartParams.start_date}
-                    customToDate={chartParams.end_date}
-                />
-                <EfficiencyChart
                     selectedOptionplant1={chartParams.plant}
                     selectedOptioninverter1={chartParams.inverter}
                     selectedOptionmppt1={chartParams.mppt}
@@ -205,6 +197,15 @@ export default function PlantAnalysis() {
                     customFromDate={chartParams.start_date}
                     customToDate={chartParams.end_date}
                 />
+                <WaterfallChart
+                    selectedOptionplant1={chartParams.plant}
+                    selectedOptioninverter1={chartParams.inverter}
+                    selectedOptionmppt1={chartParams.mppt}
+                    selectedOptionstring1={chartParams.string}
+                    customFromDate={chartParams.start_date}
+                    customToDate={chartParams.end_date}
+                />
+                
             </div>
         </div>
     );
