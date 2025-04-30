@@ -199,7 +199,7 @@ const StringTable = () => {
         {!loading && filteredData.length > 0 && (
   <button
     onClick={exportToExcel}
-    className="px-4 py-1 rounded bg-green-600 text-white hover:bg-green-700 transition"
+    className="px-4 py-1 rounded bg-blue-500 hover:bg-blue-600 transition"
   >
     Export Excel
   </button>

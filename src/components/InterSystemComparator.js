@@ -369,12 +369,13 @@ valueAxis.title.text = yAxisTitle;
     
         // Fullscreen toggle
         createButton(
-            `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
+            `<path stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" 
+                d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4" />`,
             () => {
-                const container = document.getElementById("chartFullscreenInter");
+                const chartElement = document.getElementById("chartFullscreenInter");
                 if (!document.fullscreenElement) {
-                    container.requestFullscreen().catch(err => {
-                        console.error("Fullscreen error:", err.message);
+                    chartElement.requestFullscreen().catch(err => {
+                        console.error("Error attempting to enable fullscreen mode:", err.message);
                     });
                 } else {
                     document.exitFullscreen();

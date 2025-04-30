@@ -85,8 +85,9 @@ export default function ProductionComparison() {
         plant: selectedPlant,
         inverter: selectedInverter || null,
         mppt: selectedMppt || null,
-        start_date: dateRange[0],
-        end_date: dateRange[1],
+        start_date: moment(dateRange[0]).startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+end_date: moment(dateRange[1]).endOf("day").format("YYYY-MM-DD HH:mm:ss"),
+
         attribute: selectedVariable,
         resolution: selectedResolution || '5min',
       });
@@ -382,19 +383,22 @@ export default function ProductionComparison() {
 
     // Fullscreen Mode
     createButton(
-        `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
-        () => {
-            const chartElement = document.getElementById("chartdivirradiance");
-            if (!document.fullscreenElement) {
-                chartElement.requestFullscreen().catch(err => {
-                    console.error("Error attempting to enable fullscreen mode:", err.message);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        },
-        "Toggle Fullscreen"
-    );
+      `<path stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" 
+          d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4" />`,
+      () => {
+          const chartElement = document.getElementById("chartdivirradiance");
+          if (!document.fullscreenElement) {
+              chartElement.requestFullscreen().catch(err => {
+                  console.error("Error attempting to enable fullscreen mode:", err.message);
+              });
+          } else {
+              document.exitFullscreen();
+          }
+      },
+      "Toggle Fullscreen"
+  );
+  
+  
 };
 
   function getDateFromWeek(year, week) {

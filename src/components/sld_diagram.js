@@ -1,37 +1,49 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import $ from "jquery";
-import "orgchart/dist/css/jquery.orgchart.css";
 import "orgchart";
+import "orgchart/dist/css/jquery.orgchart.css";
 import config from "@/config";
 import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
+import Select from "react-select";
+
+const parameterOptions = [
+  { value: "power", label: "Power" },
+  { value: "current", label: "Current" },
+  { value: "voltage", label: "Voltage" },
+];
 
 const SingleLineDiagramDetails = () => {
   const chartContainer = useRef(null);
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [formValues, setFormValues] = useState({
     plant: "Coca Cola Faisalabad",
-    parameter: "power",
     date: moment().subtract(40, "days").toDate(),
+    option: [
+      { value: "power", label: "Power" },
+      { value: "current", label: "Current" },
+      { value: "voltage", label: "Voltage" },
+    ],
   });
 
   useEffect(() => {
     fetchChartData();
-  }, []); // ✅ Include selectedVariable
+  }, []);
 
   const fetchChartData = async () => {
     setLoading(true);
     setError(null);
-  
+
     if (chartContainer.current) {
       $(chartContainer.current).empty();
     }
-  
+
     try {
       const response = await fetch(`${config.BASE_URL}sld/org`, {
         method: "POST",
@@ -40,11 +52,11 @@ const SingleLineDiagramDetails = () => {
         },
         body: JSON.stringify({
           plant: formValues.plant,
-          option: formValues.parameter,
+          option: formValues.option.map((o) => o.value), // send array of values
           targetDate: formValues.date,
         }),
       });
-  
+
       const result = await response.json();
       if (result.status === "success") {
         setChartData(result.data[0]);
@@ -58,11 +70,9 @@ const SingleLineDiagramDetails = () => {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     if (chartData && chartContainer.current) {
-      // 🔹 FIX: Clear previous chart before initializing a new one
       $(chartContainer.current).empty();
 
       $(chartContainer.current).orgchart({
@@ -95,10 +105,10 @@ const SingleLineDiagramDetails = () => {
 
   return (
     <div className="p-2">
-      <div className="flex justify-end space-x-4 mb-8 items-center">
-        {/* Plant Selection */}
+      <div className="flex flex-wrap justify-end gap-4 mb-8 items-center text-white">
+        {/* Plant Dropdown */}
         <div className="flex items-center space-x-2">
-          <label className="text-white">Plant:</label>
+          <label>Plant:</label>
           <select
             className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
             value={formValues.plant}
@@ -110,25 +120,49 @@ const SingleLineDiagramDetails = () => {
           </select>
         </div>
 
-        {/* Parameter Selection */}
-        <div className="flex items-center space-x-2">
-          <label className="text-white">Parameter:</label>
-          <select
-            className="px-2 py-1 rounded-md bg-[#0D2D42] h-[32px] text-white w-[200px] text-[14px]"
-            value={formValues.parameter}
-            onChange={(e) =>
-              setFormValues({ ...formValues, parameter: e.target.value })
-            }
-          >
-            <option value="power">Power</option>
-            <option value="current">Current</option>
-            <option value="voltage">Voltage</option>
-          </select>
+        {/* React-Select Multi Parameter Dropdown */}
+        <div className="flex items-center space-x-2 min-w-[350px]">
+          <label>Parameters:</label>
+          <Select
+            isMulti
+            options={parameterOptions}
+            value={formValues.option}
+            onChange={(selected) => setFormValues({ ...formValues, option: selected })}
+            className="w-[350px] text-sm"
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: "#0D2D42",
+                color: "white",
+                borderRadius: "8px",
+                border: "none",
+                minHeight: "32px",
+              }),
+              multiValue: (base) => ({
+                ...base,
+                backgroundColor: "#3498db",
+                color: "white",
+                borderRadius: "6px",
+              }),
+              multiValueLabel: (base) => ({
+                ...base,
+                color: "white",
+              }),
+              multiValueRemove: (base) => ({
+                ...base,
+                color: "white",
+                ":hover": {
+                  backgroundColor: "#2c80b4",
+                  color: "white",
+                },
+              }),
+            }}
+          />
         </div>
 
-        {/* Date Picker (No Auto-Fetch) */}
+        {/* Date Picker */}
         <div className="flex items-center space-x-2">
-          <label className="text-white">Date:</label>
+          <label>Date:</label>
           <div className="text-[14px] relative inline-flex min-w-[180px]">
             <DatePicker
               selected={formValues.date}
@@ -140,31 +174,30 @@ const SingleLineDiagramDetails = () => {
           </div>
         </div>
 
-        {/* ✅ Generate Button */}
+        {/* Generate Button */}
         <button
-          onClick={() => {
-            
-            fetchChartData();
-          }}
-          className={`px-4 py-1 rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 cursor-pointer text-white hover:bg-blue-600 transition"
+          onClick={fetchChartData}
+          className={`px-4 py-1 rounded ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-500 cursor-pointer text-white hover:bg-blue-600 transition"
           }`}
         >
-           {loading ? "Loading..." : "Generate"}
+          {loading ? "Loading..." : "Generate"}
         </button>
       </div>
 
+      {/* Chart Area */}
       <div
         id="main-section"
-        className="w-full h-[75vh] pt-[10px] mt-[20px] !overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
+        className="w-full h-[75vh] pt-[10px] mt-[20px] overflow-auto bg-[#0d2d42] p-5 rounded-lg mb-2 text-center shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)]"
       >
         {loading && (
           <div className="flex justify-center items-center h-full w-full">
             <div className="loader"></div>
           </div>
         )}
-        <div  id="chart-container"
-            ref={chartContainer}
-            className="w-full h-auto mt-[30px]"></div>
+        <div id="chart-container" ref={chartContainer} className="w-full h-auto mt-[30px]"></div>
       </div>
     </div>
   );

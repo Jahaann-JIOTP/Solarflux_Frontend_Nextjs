@@ -9,7 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
 import moment from "moment";
 import axios from "axios";
-
+import config from '@/config';
 const ClusterCharts = () => {
     const [activeTab, setActiveTab] = useState("charts");
     const [selectedPlant, setSelectedPlant] = useState("Coca Cola Faisalabad");
@@ -18,13 +18,16 @@ const ClusterCharts = () => {
         moment().subtract(1, "days").toDate(),
     ]);
     const [clusters, setClusters] = useState({});
+    const baseUrl = config.BASE_URL;
     const [clusterMeans, setClusterMeans] = useState({});
     const [clusterCounts, setClusterCounts] = useState({});
     const [loading, setLoading] = useState(true);
     const [legends, setLegends] = useState({});
+    const [inverterStringCounts, setInverterStringCounts] = useState({});
+    const [totalStringCountGlobal, setTotalStringCountGlobal] = useState(144); // fallback
+
     const chartRefs = useRef({});
 
-    const baseUrl = "https://solarfluxapi.nexalyze.com/";
 
     useEffect(() => {
         am4core.useTheme(am4themes_animated);
@@ -43,7 +46,7 @@ const ClusterCharts = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await axios.post(baseUrl + "cluster", {
+            const res = await axios.post("https://solarfluxapi.nexalyze.com/cluster", {
                 start_date: moment(dateRange[0]).format("YYYY-MM-DD"),
                 end_date: moment(dateRange[1]).format("YYYY-MM-DD"),
                 plant: selectedPlant,
@@ -52,6 +55,8 @@ const ClusterCharts = () => {
             setClusters(res.data.clustered_datapoints || {});
             setClusterMeans(res.data.cluster_means || {});
             setClusterCounts(res.data.cluster_counts || {});
+
+            await calculateTotalStringCounts(res.data.clustered_datapoints || {});
         } catch (err) {
             console.error("Error fetching data:", err);
         } finally {
@@ -59,6 +64,42 @@ const ClusterCharts = () => {
         }
     };
 
+
+    const calculateTotalStringCounts = async (clusters) => {
+        const inverterSet = new Set();
+        Object.values(clusters).forEach((entries) => {
+            entries.forEach((item) => {
+                const parts = item.Key?.split("-") || [];
+                if (parts[1]) inverterSet.add(parts[1]);
+            });
+        });
+
+        const inverters = Array.from(inverterSet);
+        const counts = {};
+        let globalTotal = 0;
+
+        for (const inverter of inverters) {
+            try {
+                let total = 0;
+                const mpptRes = await axios.post(`${baseUrl}production/get-mppt`, { devId: inverter });
+                for (const mppt of mpptRes.data) {
+                    const strRes = await axios.post(`${baseUrl}solaranalytics/get-strings`, {
+                        Plant: selectedPlant,
+                        devId: inverter,
+                        mppt: mppt.value,
+                    });
+                    total += strRes.data.length;
+                }
+                counts[inverter] = total;
+                globalTotal += total;
+            } catch (err) {
+                console.error(`Failed to fetch strings for inverter ${inverter}`, err);
+            }
+        }
+
+        setInverterStringCounts(counts);
+        setTotalStringCountGlobal(globalTotal || 144);
+    };
 
 
     const renderCharts = () => {
@@ -164,13 +205,14 @@ const ClusterCharts = () => {
         );
 
         createButton(
-            `<path d="M4 14h4v4m6 0h4v-4m-10-4H4V6m10 0h4v4" />`,
+            `<path stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" 
+                d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4" />`,
             () => {
                 const chartElement = document.getElementById(`chartdiv-${index}`);
                 if (!document.fullscreenElement) {
-                    chartElement?.requestFullscreen().catch((err) =>
-                        console.error("Fullscreen error:", err.message)
-                    );
+                    chartElement.requestFullscreen().catch(err => {
+                        console.error("Error attempting to enable fullscreen mode:", err.message);
+                    });
                 } else {
                     document.exitFullscreen();
                 }
@@ -264,45 +306,45 @@ const ClusterCharts = () => {
                     className="w-full h-[69vh] pt-[10px] mt-[20px] bg-[#0d2d42] p-6 rounded-lg mb-2 text-white shadow-[0px_0px_15px_rgba(0,136,255,0.7),_inset_0px_10px_15px_rgba(0,0,0,0.6)] overflow-auto"
                     id="main-section"
                 >
-                <div className="w-full overflow-x-auto flex justify-center">
-                    <div className="flex gap-6 px-4 py-4 max-w-[90%] overflow-x-auto" id="main-section">
-                        {Object.entries(clusterCounts).map(([clusterId, count]) => (
-                            <div
-                                key={clusterId}
-                                className="relative min-w-[290px] max-w-[290px] rounded-2xl p-6 text-center bg-gradient-to-br from-[#0f2d3e] to-[#11394e] shadow-[0_0_25px_rgba(0,136,255,0.3)] hover:shadow-[0_0_30px_rgba(0,136,255,0.6)] transition duration-300 transform hover:-translate-y-1"
-                            >
-                                {/* Floating Icon */}
-                                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-[white] text-white w-15 h-15 flex items-center justify-center rounded-full shadow-lg border-4 border-[#0f2d3e] text-2xl">
-                                    <svg width="30" height="30" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="black" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="40" y1="180" x2="40" y2="20" stroke="black" />
-                                        <line x1="40" y1="180" x2="180" y2="180" stroke="black" />
-                                        <rect x="50" y="50" width="15" height="15" fill="#E0B24D" stroke="black" />
-                                        <rect x="70" y="70" width="15" height="15" fill="#E0B24D" stroke="black" />
-                                        <rect x="50" y="90" width="15" height="15" fill="#E0B24D" stroke="black" />
-                                        <rect x="30" y="70" width="15" height="15" fill="#E0B24D" stroke="black" />
-                                        <rect x="100" y="40" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                        <rect x="80" y="70" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                        <rect x="120" y="70" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                        <rect x="100" y="90" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                        <rect x="140" y="90" width="15" height="15" fill="#E46C6C" stroke="black" />
-                                        <circle cx="70" cy="160" r="8" fill="#5DADE2" stroke="black" />
-                                        <circle cx="90" cy="140" r="8" fill="#5DADE2" stroke="black" />
-                                        <circle cx="110" cy="160" r="8" fill="#5DADE2" stroke="black" />
-                                        <circle cx="130" cy="140" r="8" fill="#5DADE2" stroke="black" />
-                                    </svg>
+                    <div className="w-full overflow-x-auto flex justify-center">
+                        <div className="flex gap-6 px-4 py-4 max-w-[90%] overflow-x-auto" id="main-section">
+                            {Object.entries(clusterCounts).map(([clusterId, count]) => (
+                                <div
+                                    key={clusterId}
+                                    className="relative min-w-[290px] max-w-[290px] rounded-2xl p-6 text-center bg-gradient-to-br from-[#0f2d3e] to-[#11394e] shadow-[0_0_25px_rgba(0,136,255,0.3)] hover:shadow-[0_0_30px_rgba(0,136,255,0.6)] transition duration-300 transform hover:-translate-y-1"
+                                >
+                                    {/* Floating Icon */}
+                                    <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-[white] text-white w-15 h-15 flex items-center justify-center rounded-full shadow-lg border-4 border-[#0f2d3e] text-2xl">
+                                        <svg width="30" height="30" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="black" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="40" y1="180" x2="40" y2="20" stroke="black" />
+                                            <line x1="40" y1="180" x2="180" y2="180" stroke="black" />
+                                            <rect x="50" y="50" width="15" height="15" fill="#E0B24D" stroke="black" />
+                                            <rect x="70" y="70" width="15" height="15" fill="#E0B24D" stroke="black" />
+                                            <rect x="50" y="90" width="15" height="15" fill="#E0B24D" stroke="black" />
+                                            <rect x="30" y="70" width="15" height="15" fill="#E0B24D" stroke="black" />
+                                            <rect x="100" y="40" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                            <rect x="80" y="70" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                            <rect x="120" y="70" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                            <rect x="100" y="90" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                            <rect x="140" y="90" width="15" height="15" fill="#E46C6C" stroke="black" />
+                                            <circle cx="70" cy="160" r="8" fill="#5DADE2" stroke="black" />
+                                            <circle cx="90" cy="140" r="8" fill="#5DADE2" stroke="black" />
+                                            <circle cx="110" cy="160" r="8" fill="#5DADE2" stroke="black" />
+                                            <circle cx="130" cy="140" r="8" fill="#5DADE2" stroke="black" />
+                                        </svg>
+                                    </div>
+                                    <div className="mt-8">
+                                        <h4 className="text-lg font-semibold text-white mb-1 tracking-wide">
+                                            Cluster {Number(clusterId) + 1}
+                                        </h4>
+                                        <p className="text-sm text-blue-300 mb-2">Total Data Points</p>
+                                        <p className="text-2xl font-extrabold text-white">{count}</p>
+                                    </div>
                                 </div>
-                                <div className="mt-8">
-                                    <h4 className="text-lg font-semibold text-white mb-1 tracking-wide">
-                                        Cluster {Number(clusterId) + 1}
-                                    </h4>
-                                    <p className="text-sm text-blue-300 mb-2">Total Data Points</p>
-                                    <p className="text-2xl font-extrabold text-white">{count}</p>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-           
+
                     {/* Header */}
                     <h3 className="text-2xl font-bold mb-4 tracking-wide text-center mt-5">
                         Cluster Inverter/String Summary 📊
@@ -322,77 +364,84 @@ const ClusterCharts = () => {
                                 </tr>
                             </thead>
                             <tbody>
-  {(() => {
-    const inverterSet = new Set();
-    Object.values(clusters).forEach((entries) => {
-      entries.forEach((item) => {
-        const keyParts = item.Key?.split("-") || [];
-        const inverter = keyParts[1];
-        if (inverter) inverterSet.add(inverter);
-      });
-    });
-    const inverters = Array.from(inverterSet);
+                                {(() => {
+                                    const inverterSet = new Set();
+                                    Object.values(clusters).forEach((entries) => {
+                                        entries.forEach((item) => {
+                                            const keyParts = item.Key?.split("-") || [];
+                                            const inverter = keyParts[1];
+                                            if (inverter) inverterSet.add(inverter);
+                                        });
+                                    });
+                                    const inverters = Array.from(inverterSet);
 
-    const clusterTotals = {}; // For summary row
+                                    const clusterTotals = {}; // For summary row
 
-    return (
-      <>
-        {inverters.map((inverter) => (
-          <tr key={inverter} className="hover:bg-gray-700">
-            <td className="p-3 border border-gray-600 font-medium">{inverter}</td>
-            {Object.keys(clusters).map((clusterId) => {
-              const relevantEntries = clusters[clusterId].filter((item) => {
-                const keyParts = item.Key?.split("-") || [];
-                return keyParts[1] === inverter;
-              });
-              const uniqueMPPTs = new Set();
-              const uniqueStrings = new Set();
-              relevantEntries.forEach((item) => {
-                const parts = item.Key?.split("-") || [];
-                if (parts[2]) uniqueMPPTs.add(parts[2]);
-                if (parts[3]) uniqueStrings.add(parts[3]);
-              });
+                                    return (
+                                        <>
+                                            {inverters.map((inverter) => (
+                                                <tr key={inverter} className="hover:bg-gray-700">
+                                                    <td className="p-3 border border-gray-600 font-medium">{inverter}</td>
+                                                    {Object.keys(clusters).map((clusterId) => {
+                                                        const relevantEntries = clusters[clusterId].filter((item) => {
+                                                            const keyParts = item.Key?.split("-") || [];
+                                                            return keyParts[1] === inverter;
+                                                        });
+                                                        const uniqueMPPTs = new Set();
+                                                        const uniqueStrings = new Set();
+                                                        relevantEntries.forEach((item) => {
+                                                            const parts = item.Key?.split("-") || [];
+                                                            if (parts[2]) uniqueMPPTs.add(parts[2]);
+                                                            if (parts[3]) uniqueStrings.add(parts[3]);
+                                                        });
 
-              const stringCount = uniqueStrings.size;
-              const mpptCount = uniqueMPPTs.size;
+                                                        const stringCount = uniqueStrings.size;
+                                                        const mpptCount = uniqueMPPTs.size;
 
-              // Update totals
-              if (!clusterTotals[clusterId]) {
-                clusterTotals[clusterId] = { strings: 0 };
-              }
-              clusterTotals[clusterId].strings += stringCount;
+                                                        // Update totals
+                                                        if (!clusterTotals[clusterId]) {
+                                                            clusterTotals[clusterId] = { strings: 0 };
+                                                        }
+                                                        clusterTotals[clusterId].strings += stringCount;
 
-              const stringPercentage = ((stringCount / 28) * 100).toFixed(1);
+                                                        const maxStrings = inverterStringCounts[inverter] || 28;
+                                                        const stringPercentage = ((stringCount / maxStrings) * 100).toFixed(1);
 
-              return (
-                <td key={clusterId} className="p-3 border border-gray-600 text-sm">
-                  <div>{stringCount} Strings / {mpptCount} MPPTs</div>
-                  <div className="text-blue-300">{stringPercentage}%</div>
-                </td>
-              );
-            })}
-          </tr>
-        ))}
 
-        {/* Summary Row */}
-        <tr className="bg-[#09364f] font-semibold">
-          <td className="p-3 border border-gray-600">Average (Strings)</td>
-          {Object.keys(clusters).map((clusterId) => {
-            const total = clusterTotals[clusterId]?.strings || 0;
-            const average = (total / 144).toFixed(2);
-            const percentage = ((total / 144) * 100).toFixed(1);
-            return (
-              <td key={`summary-${clusterId}`} className="p-3 border border-gray-600 text-sm">
-                <div>Total: {total}</div>
-                <div>Avg: {average} ({percentage}%)</div>
-              </td>
-            );
-          })}
-        </tr>
-      </>
-    );
-  })()}
-</tbody>
+                                                        return (
+                                                            <td key={clusterId} className="p-3 border border-gray-600 text-sm">
+                                                                <div>{stringCount} Strings</div>
+                                                                <div className="text-blue-300">
+                                                                    of {inverterStringCounts[inverter] || '...'} total
+                                                                </div>
+
+                                                                <div className="text-blue-300">{stringPercentage}%</div>
+                                                            </td>
+                                                        );
+                                                    })}
+                                                </tr>
+                                            ))}
+
+                                            {/* Summary Row */}
+                                            <tr className="bg-[#09364f] font-semibold">
+                                                <td className="p-3 border border-gray-600">Average (Strings)</td>
+                                                {Object.keys(clusters).map((clusterId) => {
+                                                    const total = clusterTotals[clusterId]?.strings || 0;
+                                                    const average = (total / totalStringCountGlobal).toFixed(2);
+                                                    const percentage = ((total / totalStringCountGlobal) * 100).toFixed(1);
+
+                                                    return (
+                                                        <td key={`summary-${clusterId}`} className="p-3 border border-gray-600 text-sm">
+                                                            <div>Total: {total}</div>
+                                                            <div>Avg: {average} ({percentage}%)</div>
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        </>
+                                    );
+                                })()}
+                            </tbody>
 
                         </table>
                     </div>
