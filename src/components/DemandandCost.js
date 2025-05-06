@@ -6,7 +6,7 @@ import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import axios from "axios";
 import config from "@/config";
-
+import moment from "moment";
 am4core.useTheme(am4themes_animated);
 
 const DemandAndCost = ({
@@ -38,8 +38,8 @@ const DemandAndCost = ({
     setLoading(true);
     try {
       const response = await axios.post(`${config.BASE_URL}power/active_power`, {
-        start_date: customFromDate,
-        end_date: customToDate,
+        start_date: moment(customFromDate).format("YYYY-MM-DD"),
+        end_date: moment(customToDate).format("YYYY-MM-DD"),
         peakhour,
         nonpeakhour,
         plant: selectedOptionplant1,
@@ -101,17 +101,17 @@ const DemandAndCost = ({
       powerSeries.columns.template.stroke = gradient;
 
       const costSeries = chart.series.push(new am4charts.LineSeries());
-costSeries.dataFields.valueY = "cost";
-costSeries.dataFields.categoryX = "hour";
-costSeries.name = "Cost";
-costSeries.yAxis = costAxis;
-costSeries.stroke = am4core.color("#fdd017");
-costSeries.strokeWidth = 2;
+      costSeries.dataFields.valueY = "cost";
+      costSeries.dataFields.categoryX = "hour";
+      costSeries.name = "Cost";
+      costSeries.yAxis = costAxis;
+      costSeries.stroke = am4core.color("#fdd017");
+      costSeries.strokeWidth = 2;
 
-const bullet = costSeries.bullets.push(new am4charts.CircleBullet());
-bullet.circle.fill = costSeries.stroke;
-bullet.circle.stroke = costSeries.stroke;
-bullet.circle.radius = 4;
+      const bullet = costSeries.bullets.push(new am4charts.CircleBullet());
+      bullet.circle.fill = costSeries.stroke;
+      bullet.circle.stroke = costSeries.stroke;
+      bullet.circle.radius = 4;
 
 
       // Legend
@@ -168,17 +168,17 @@ bullet.circle.radius = 4;
       `<path stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" 
           d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4" />`,
       () => {
-          const chartElement = document.getElementById("chartdivlayered");
-          if (!document.fullscreenElement) {
-              chartElement.requestFullscreen().catch(err => {
-                  console.error("Error attempting to enable fullscreen mode:", err.message);
-              });
-          } else {
-              document.exitFullscreen();
-          }
+        const chartElement = document.getElementById("chartdivlayered");
+        if (!document.fullscreenElement) {
+          chartElement.requestFullscreen().catch(err => {
+            console.error("Error attempting to enable fullscreen mode:", err.message);
+          });
+        } else {
+          document.exitFullscreen();
+        }
       },
       "Toggle Fullscreen"
-  );
+    );
   };
 
   return (

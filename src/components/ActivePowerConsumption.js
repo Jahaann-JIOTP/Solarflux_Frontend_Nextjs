@@ -6,7 +6,7 @@ import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import axios from "axios";
 import config from "@/config";
-
+import moment from 'moment';
 am4core.useTheme(am4themes_animated);
 
 export default function ActivePowerConsumption({ selectedOptionplant1, customFromDate, customToDate }) {
@@ -27,8 +27,8 @@ export default function ActivePowerConsumption({ selectedOptionplant1, customFro
     setLoading(true);
     try {
       const response = await axios.post(`${baseUrl}power/active_power_hourgroup`, {
-        start_date: customFromDate,
-        end_date: customToDate,
+        start_date: moment(customFromDate).format("YYYY-MM-DD"),
+        end_date: moment(customToDate).format("YYYY-MM-DD"),
         peakhour: peakhour1,
         nonpeakhour: nonpeakhour1,
         plant: selectedOptionplant1,

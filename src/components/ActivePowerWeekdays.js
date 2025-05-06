@@ -6,7 +6,7 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import am4themes_animated from '@amcharts/amcharts4/themes/animated';
 import axios from 'axios';
 import config from '@/config';
-
+import moment from 'moment';
 am4core.useTheme(am4themes_animated);
 
 export default function ActivePowerWeekdays({ selectedOptionplant1, customFromDate, customToDate }) {
@@ -26,8 +26,8 @@ export default function ActivePowerWeekdays({ selectedOptionplant1, customFromDa
     setLoading(true);
     try {
       const response = await axios.post(`${baseUrl}power/active_power_weekday`, {
-        start_date: customFromDate,
-        end_date: customToDate,
+        start_date: moment(customFromDate).format("YYYY-MM-DD"),
+        end_date: moment(customToDate).format("YYYY-MM-DD"),
         aggregation,
         plant: selectedOptionplant1
       });

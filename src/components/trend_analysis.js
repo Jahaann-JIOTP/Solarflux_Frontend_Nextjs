@@ -85,8 +85,8 @@ export default function ProductionComparison() {
         plant: selectedPlant,
         inverter: selectedInverter || null,
         mppt: selectedMppt || null,
-        start_date: moment(dateRange[0]).startOf("day").format("YYYY-MM-DD HH:mm:ss"),
-end_date: moment(dateRange[1]).endOf("day").format("YYYY-MM-DD HH:mm:ss"),
+        start_date: moment(dateRange[0]).startOf("day").format("YYYY-MM-DD"),
+end_date: moment(dateRange[1]).endOf("day").format("YYYY-MM-DD"),
 
         attribute: selectedVariable,
         resolution: selectedResolution || '5min',
@@ -287,7 +287,15 @@ end_date: moment(dateRange[1]).endOf("day").format("YYYY-MM-DD HH:mm:ss"),
           series.strokeWidth = 2;
           series.fillOpacity = 0.3;
           series.tooltipText = `${sn}: [bold]{valueY}[/] at [bold]{xLabel}[/]`;
-  
+          if (processedData[sn].length === 1) {
+            const bullet = series.bullets.push(new am4charts.CircleBullet());
+            bullet.circle.radius = 5;
+            bullet.circle.stroke = am4core.color("#fff");
+            bullet.circle.strokeWidth = 2;
+            bullet.circle.fill = am4core.color(getColor(index));
+          }
+          
+          
           series.stroke = am4core.color(getColor(index));
           series.tensionX = 0.8;
   

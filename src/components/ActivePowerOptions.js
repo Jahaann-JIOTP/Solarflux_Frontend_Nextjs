@@ -6,7 +6,7 @@ import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import axios from "axios";
 import config from "@/config";
-
+import moment from 'moment';
 am4core.useTheme(am4themes_animated);
 
 const ActivePowerOptions = ({
@@ -33,10 +33,10 @@ const ActivePowerOptions = ({
     setLoading(true);
     try {
       const response = await axios.post(`${baseUrl}power/active_power_day`, {
-        end_date: customToDate,
+        start_date: moment(customFromDate).format("YYYY-MM-DD"),
+  end_date: moment(customToDate).format("YYYY-MM-DD"),
         option: selectedOption,
         tarrif,
-        start_date: customFromDate,
         plant: selectedOptionplant1,
       });
 

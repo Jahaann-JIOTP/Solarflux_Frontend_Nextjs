@@ -106,7 +106,7 @@ export default function SolarSuppressionChart({ option }) {
           ctx.fillStyle = color; // Apply color based on condition
           ctx.textAlign = "center";
           ctx.font = "bold 20px Arial";
-          ctx.fillText(arrow, barLeftX - 10, barMiddleY);
+          ctx.fillText(arrow, barLeftX - 30, barMiddleY);
           ctx.restore();
         },
       };

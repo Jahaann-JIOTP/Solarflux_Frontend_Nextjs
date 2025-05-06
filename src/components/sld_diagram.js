@@ -11,7 +11,7 @@ import { FaCalendarAlt } from "react-icons/fa";
 import Select from "react-select";
 
 const parameterOptions = [
-  { value: "power", label: "Power" },
+  { value: "power", label: "Energy" },
   { value: "current", label: "Current" },
   { value: "voltage", label: "Voltage" },
 ];
@@ -26,7 +26,7 @@ const SingleLineDiagramDetails = () => {
     plant: "Coca Cola Faisalabad",
     date: moment().subtract(40, "days").toDate(),
     option: [
-      { value: "power", label: "Power" },
+      { value: "power", label: "Energy" },
       { value: "current", label: "Current" },
       { value: "voltage", label: "Voltage" },
     ],
@@ -53,7 +53,7 @@ const SingleLineDiagramDetails = () => {
         body: JSON.stringify({
           plant: formValues.plant,
           option: formValues.option.map((o) => o.value), // send array of values
-          targetDate: formValues.date,
+          targetDate: moment(formValues.date).format("YYYY-MM-DD"),
         }),
       });
 

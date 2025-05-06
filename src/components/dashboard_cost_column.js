@@ -59,6 +59,7 @@ const SolarCostChart = ({ option }) => {
         id: "addArrowPlugin",
         afterDatasetsDraw(chart) {
           const { ctx, data } = chart;
+          
           const dataset = data.datasets[0].data;
           const labels = data.labels;
           const meta = chart.getDatasetMeta(0).data;
@@ -103,7 +104,7 @@ const SolarCostChart = ({ option }) => {
             ctx.fillStyle = color;
             ctx.textAlign = "center";
             ctx.font = "bold 20px Arial";
-            ctx.fillText(arrow, barLeftX - 10, barMiddleY);
+            ctx.fillText(arrow, barLeftX - 30, barMiddleY);
             ctx.restore();
           }
         },
